@@ -44,7 +44,6 @@ class BaseClient:
 
         url = f"{self.base_url}/{endpoint}"
         response = requests.post(url, headers=headers, **kwargs)
-        response.raise_for_status()
         return response.json()
 
     def put(self, endpoint, **kwargs):

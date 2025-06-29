@@ -55,5 +55,4 @@ class MiniAppsClient(BaseClient):
             "file": (f"{miniapp_id}.json", json.dumps(payload), "application/json")
         }
 
-        response = self.put(endpoint, files=files)
-        return response.json()
+        return self.put(endpoint, files=files)
