@@ -2,9 +2,6 @@ from .base import BaseClient
 
 
 class OrchestratorClient(BaseClient):
-    def __init__(self):
-        super().__init__()
-        self.base_url = self.auth.host
 
     def search_apps(self, search_term: str | None = None, page_size: int = 30) -> dict:
         """Search Orchestrator apps with optional search term.

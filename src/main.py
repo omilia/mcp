@@ -6,6 +6,9 @@ from mcp.server.fastmcp import FastMCP
 from ocp.insights import InsightsClient
 from ocp.miniapps import MiniAppsClient
 from ocp.orchestrator import OrchestratorClient
+from ocp.integrations import IntegrationsClient
+from ocp.environments_manager import EnvironmentsManagerClient
+
 
 mcp = FastMCP("OCP")
 
@@ -148,14 +151,23 @@ def get_orchestrator_app(canvas_id: str) -> dict:
     client = OrchestratorClient()
     return client.get_canvas(canvas_id)
 
+
 @mcp.tool()
-def search_dialog_logs(apps: list, from_date: str = None, to_date: str = None,
-                      size: int = 10, ani: list = None, dialog_group: str = None,
-                      ocp_group_names: list = None, region: str = None, 
-                      application_layer: bool = True, steps_gt: int = None):
+def search_dialog_logs(
+    apps: list,
+    from_date: str = None,
+    to_date: str = None,
+    size: int = 10,
+    ani: list = None,
+    dialog_group: str = None,
+    ocp_group_names: list = None,
+    region: str = None,
+    application_layer: bool = True,
+    steps_gt: int = None,
+):
     """Search dialogs using various filter criteria. Can also be requested by users by saying
     "find sessions", "search logs" or "identify dialog logs"
-    
+
     Args:
         apps (list): List of miniApp_ids or sandbox_flowapp_app_ids to filter by. This is not the same as the orchestrator app ID! One MUST get the sandbox_flowapp_app_id from the search_orchestrator_apps tool first.
         from_date (str, optional): Start date/time in ISO format or milliseconds timestamp. Defaults to 24 hours ago.
@@ -167,7 +179,7 @@ def search_dialog_logs(apps: list, from_date: str = None, to_date: str = None,
         region (str, optional): Region to filter by
         application_layer (bool, optional): Whether to include application layer. Defaults to True
         steps_gt (int, optional): Filter dialogs with steps greater than this number
-        
+
     Returns:
         dict: Search results containing matching dialogs
     """
@@ -188,5 +200,38 @@ def search_dialog_logs(apps: list, from_date: str = None, to_date: str = None,
         ocp_group_names=ocp_group_names,
         region=region,
         application_layer=application_layer,
-        steps_gt=steps_gt
+        steps_gt=steps_gt,
     )
+
+
+@mcp.tool()
+def search_numbers(search_term: str | None = None) -> list[str]:
+    """Search (phone) numbers with optional search term.
+
+    Args:
+        search_term: Optional search term to filter numbers
+    """
+    client = IntegrationsClient()
+    return client.search_numbers(search_term=search_term)
+
+
+@mcp.tool()
+def search_variable_collections(search_term: str | None = None) -> list[str]:
+    """Search variable collections with optional search term.
+
+    Args:
+        search_term: Optional search term to filter variable collections
+    """
+    client = EnvironmentsManagerClient()
+    return client.get_variable_collections(search_term=search_term)
+
+
+@mcp.tool()
+def get_collection_variables(collection_id: str) -> list[str]:
+    """Get a list of all variables in a collection.
+
+    Args:
+        collection_id: The ID of the collection to get variables for
+    """
+    client = EnvironmentsManagerClient()
+    return client.get_collection_variables(collection_id=collection_id)
