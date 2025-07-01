@@ -157,7 +157,7 @@ def search_dialog_logs(apps: list, from_date: str = None, to_date: str = None,
     "find sessions", "search logs" or "identify dialog logs"
     
     Args:
-        apps (list): List of sandbox_flowapp_app_ids to filter by
+        apps (list): List of miniApp_ids or sandbox_flowapp_app_ids to filter by. This is not the same as the orchestrator app ID! One MUST get the sandbox_flowapp_app_id from the search_orchestrator_apps tool first.
         from_date (str, optional): Start date/time in ISO format or milliseconds timestamp. Defaults to 24 hours ago.
         to_date (str, optional): End date/time in ISO format or milliseconds timestamp. Defaults to now.
         size (int, optional): Number of results to return. Defaults to 10
@@ -190,5 +190,3 @@ def search_dialog_logs(apps: list, from_date: str = None, to_date: str = None,
         application_layer=application_layer,
         steps_gt=steps_gt
     )
-
-# run with $env:DANGEROUSLY_OMIT_AUTH="true"; uv run mcp dev src/main.py

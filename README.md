@@ -17,7 +17,7 @@ This repository contains a set of tools for working with the Omilia Cloud Platfo
 ## Installation
 
 - Make sure you have **Python 3.10** or newer installed.
-- Install [uv](https://github.com/astral-sh/uv):
+- Install [uv](https://github.com/astral-sh/uv).
 - Clone this repository and navigate to the project directory.
 - Copy the file `.env.example` to `.env` and set the appropriate values.
 - Test if the istallation is correct by running `uv run mcp dev src/main.py`. This should open the mcp development server. Click on connect and try it out.
@@ -58,7 +58,7 @@ To use this project with any of the above clients, you need to configure your MC
         "mcp",
         "mcp",
         "run",
-        "<path_to_cloned_repository>>/om-mcp/src/main.py"
+        "<path_to_cloned_repository>>/omilia-mcp/src/main.py"
       ],
       "env": {
         "PATH": "<depending on how you installed the needed tools you may need to paste your PATH here>"
