@@ -11,6 +11,10 @@ This repository contains a set of tools for working with the Omilia Cloud Platfo
 - **search_orchestrator_apps**: Search for Orchestrator apps by keyword.
 - **get_orchestrator_app**: Retrieve the canvas (nodes and edges) for an Orchestrator app by ID.
 - **search_dialog_logs**: Search dialog logs with various filters (date, app, region, etc.).
+- **search_numbers**: Search for phone numbers with optional search term.
+- **search_variable_collections**: Search variable collections with optional search term.
+- **get_collection_variables**: Get a list of all variables in a collection by ID.
+
 
 ---
 
