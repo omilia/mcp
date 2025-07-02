@@ -61,17 +61,20 @@ class InsightsClient(BaseClient):
             dict: Search results containing matching dialogs
         """
         endpoint = "dialogs-api/insights/v2/dialogs/search"
-        headers = self._get_auth_headers()
 
         from_ms = self._convert_to_ms(from_date)
         to_ms = self._convert_to_ms(to_date)
         # Build search payload from parameters
         payload = {
             "apps": apps,
-            "from": from_ms,
-            "to": to_ms,
+            "from_ms": from_ms,
+            "to_ms": to_ms,
             "size": size,
-            "applicationLayer": application_layer,
+            "query_params": {
+                "application_layer": application_layer,
+                "ocp_group_names": [apps[0].split(".")[-1]],
+            },
+            "order": "desc",
         }
 
         # Add optional parameters if provided

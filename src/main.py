@@ -1,4 +1,3 @@
-import random
 from datetime import datetime, timedelta
 
 from mcp.server.fastmcp import FastMCP
@@ -185,7 +184,7 @@ def search_dialog_logs(
     """
     # Default to last 24 hours if dates not provided
     if to_date is None:
-        to_date = datetime.utcnow().isoformat() + "Z"
+        to_date = (datetime.utcnow() + timedelta(hours=2)).isoformat() + "Z"
     if from_date is None:
         from_date = (datetime.utcnow() - timedelta(days=1)).isoformat() + "Z"
 
