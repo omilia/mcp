@@ -2,6 +2,10 @@
 
 This repository contains a set of tools for working with the Omilia Cloud Platform (OCP). These utilities help manage miniapps, orchestrator apps, and dialog logs.
 
+<a href="https://glama.ai/mcp/servers/@omilia/mcp">
+  <img width="380" height="200" src="https://glama.ai/mcp/servers/@omilia/mcp/badge" alt="Omilia Tools MCP server" />
+</a>
+
 ## Tools Overview
 
 - **search_miniapps**: Search for miniapps by name or keyword.
