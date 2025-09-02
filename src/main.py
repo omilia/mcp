@@ -13,7 +13,7 @@ mcp = FastMCP("OCP")
 
 
 @mcp.tool()
-def search_miniapps(search_term: str | None = None) -> list[str]:
+def search_miniapps(search_term: str | None = None) -> dict:
     """Search miniapps. Useful to return a list of miniapps that match a search term.
     Args:
         search_term: Optional search term to filter miniapps
@@ -114,7 +114,7 @@ def set_miniapp_prompt(miniapp_id: str, prompt_type: str, prompt: str) -> dict:
 
 
 @mcp.tool()
-def get_dialog_logs(dialog_id: str) -> str:
+def get_dialog_logs(dialog_id: str):
     """Get the dialog logs for a specific dialog ID. Useful for retrieving conversation history and analytics.
 
     Args:
@@ -128,7 +128,7 @@ def get_dialog_logs(dialog_id: str) -> str:
 
 
 @mcp.tool()
-def search_orchestrator_apps(search_term: str | None = None) -> list[str]:
+def search_orchestrator_apps(search_term: str | None = None) -> dict:
     """Search Orchestrator apps with optional search term.
 
     Args:
@@ -204,7 +204,7 @@ def search_dialog_logs(
 
 
 @mcp.tool()
-def search_numbers(search_term: str | None = None) -> list[str]:
+def search_numbers(search_term: str | None = None) -> dict:
     """Search (phone) numbers with optional search term.
 
     Args:
