@@ -1,17 +1,19 @@
 [project]
-name = "mcp-test"
+name = "omilia-copilot-server"
 version = "0.1.0"
-description = "Add your description here"
+description = "MCP server providing AI assistants with intelligent access to Omilia Cloud Platform (OCP) for voice application management, analytics, and platform operations"
 readme = "README.md"
 requires-python = ">=3.10"
 dependencies = [
     "mcp[cli]>=1.9.4",
     "requests>=2.32.4",
+    "python-dotenv>=1.0.0",
 ]
 
 [project.optional-dependencies]
 dev = [
     "ipython",
+    "pytest>=8.0.0",
 ]
 
 [dependency-groups]
