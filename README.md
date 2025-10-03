@@ -1,60 +1,97 @@
-# Omilia MCP Tools
+# OCP Co-Pilot Server
 
-This repository contains a set of tools for working with the Omilia Cloud Platform (OCP). These utilities help manage miniapps, orchestrator apps, and dialog logs.
+The **OCP Co-Pilot Server** is an intelligent assistant server that provides natural language interface capabilities for the **Omilia Cloud Platform (OCP)**. This server implements the Model Context Protocol (MCP) to enable AI agents and Large Language Models (LLMs) to interact with OCP through a rich set of tools and APIs.
 
-## Tools Overview
+## Overview
 
-- **search_miniapps**: Search for miniapps by name or keyword.
-- **get_miniapp**: Retrieve details for a specific miniapp using its ID.
-- **set_miniapp_prompt**: Update prompts (welcome, error, reaction messages) for a miniapp.
-- **get_dialog_logs**: Fetch logs for a specific dialog session.
-- **search_orchestrator_apps**: Search for Orchestrator apps by keyword.
-- **get_orchestrator_app**: Retrieve the canvas (nodes and edges) for an Orchestrator app by ID.
-- **search_dialog_logs**: Search dialog logs with various filters (date, app, region, etc.).
-- **search_numbers**: Search for phone numbers with optional search term.
-- **search_variable_collections**: Search variable collections with optional search term.
-- **get_collection_variables**: Get a list of all variables in a collection by ID.
+The OCP Co-Pilot Server serves as a bridge between conversational AI systems and the Omilia Cloud Platform, enabling:
 
+- **Natural Language Operations**: Execute OCP tasks through conversational commands
+- **Automated Workflows**: Handle complex multi-step operations across OCP services
+- **Context-Aware Assistance**: Provide intelligent responses based on OCP state and user intent
+- **Comprehensive Platform Integration**: Access all major OCP components through unified APIs
 
----
+## Architecture
+
+The server is built around several specialized clients that interact with different OCP services:
+
+- **MiniApps Client**: Manage voice applications and conversational flows
+- **Orchestrator Client**: Handle complex dialog orchestration and canvas management
+- **Insights Client**: Access analytics, logs, and conversation data
+- **Integrations Client**: Manage phone numbers and external integrations  
+- **Environments Manager Client**: Handle configuration variables and environment settings
+
+## Available Tools
+
+### MiniApps Management
+- **search_miniapps**: Search for voice applications by name or keyword
+- **get_miniapp**: Retrieve detailed configuration for a specific voice app
+- **set_miniapp_prompt**: Update conversational prompts (welcome, error, reaction messages)
+
+### Dialog Orchestration
+- **search_orchestrator_apps**: Find orchestrator applications by keyword
+- **get_orchestrator_app**: Retrieve canvas structure (nodes and edges) for dialog flows
+
+### Analytics & Insights
+- **search_dialog_logs**: Search conversation logs with advanced filtering (date, app, region, caller)
+- **get_dialog_logs**: Fetch complete conversation history for a specific dialog session
+
+### System Configuration
+- **search_numbers**: Find and manage phone numbers in the system
+- **search_variable_collections**: Locate configuration variable collections
+- **get_collection_variables**: Retrieve all variables within a collection
 
 ## Installation
 
-- Make sure you have **Python 3.10** or newer installed.
-- Install [uv](https://github.com/astral-sh/uv).
-- Clone this repository and navigate to the project directory.
-- Copy the file `.env.example` to `.env` and set the appropriate values.
-- Test if the istallation is correct by running `uv run mcp dev src/main.py`. This should open the mcp development server. Click on connect and try it out.
+### Prerequisites
+- **Python 3.10** or newer
+- [uv](https://github.com/astral-sh/uv) package manager
+
+### Setup Steps
+1. Clone this repository and navigate to the project directory
+2. Copy `.env.example` to `.env` and configure your OCP credentials:
+   ```bash
+   cp .env.example .env
+   # Edit .env with your OCP instance details
+   ```
+3. Test the installation:
+   ```bash
+   uv run mcp dev src/main.py
+   ```
+   This opens the MCP development server - click "Connect" to test the tools.
+
+## Configuration
+
+Update your `.env` file with your OCP environment details:
+
+```env
+# OCP Host URL (e.g., https://us1-m.ocp.ai, https://eu1-m.ocp.ai)
+OCP_HOST=https://your-ocp-instance.ocp.ai
+
+# OCP Authentication Credentials
+OCP_USERNAME=your_username
+OCP_PASSWORD=your_password
+```
 
 ## Usage
 
-You can use these tools in two main ways:
+The OCP Co-Pilot Server can be integrated with various AI systems and applications:
 
-### 1. Self-hosting (MCP Python SDK)
+### 1. MCP-Compatible Clients
 
-You can run your own MCP server using the [official Python MCP SDK](https://github.com/modelcontextprotocol/python-sdk). This is the most flexible option and is recommended for advanced users. For full instructions, see the [MCP Python SDK README](https://github.com/modelcontextprotocol/python-sdk#running-your-server).
-
-### 2. Local usage with Gemini CLI, Cursor, or Claude Desktop
-
-You can also use this project locally with any MCP-compatible client, such as:
-
-- [Gemini CLI](https://github.com/google-gemini/gemini-cli)
-- [Cursor](https://www.cursor.com/)
+Use with any MCP-compatible client such as:
 - [Claude Desktop](https://www.anthropic.com/claude)
+- [Cursor](https://www.cursor.com/)
+- [Gemini CLI](https://github.com/google-gemini/gemini-cli)
 
-Each of these clients allows you to connect to local MCP servers. For more information, see their respective documentation:
-- [Gemini CLI: Configuring custom MCP servers](https://github.com/google-gemini/gemini-cli/blob/main/docs/tools/mcp-server.md#how-to-set-up-your-mcp-server)
-- [Claude Desktop: MCP servers](https://modelcontextprotocol.info/docs/quickstart/user/)
-- [Cursor: Configuring custom MCP servers](https://docs.cursor.com/context/model-context-protocol#manual-configuration)
+#### MCP Configuration Example
 
-#### Configuring MCP Servers
-
-To use this project with any of the above clients, you need to configure your MCP servers. For example, you can use the following `mcp.json` configuration (place it in the appropriate config directory for your client):
+Add this configuration to your MCP client's config file:
 
 ```json
 {
   "mcpServers": {
-    "Omilia MCP": {
+    "OCP Co-Pilot": {
       "command": "uv",
       "args": [
         "run",
@@ -62,13 +99,92 @@ To use this project with any of the above clients, you need to configure your MC
         "mcp",
         "mcp",
         "run",
-        "<path_to_cloned_repository>>/omilia-mcp/src/main.py"
+        "/path/to/omilia-copilot-server/src/main.py"
       ],
       "env": {
-        "PATH": "<depending on how you installed the needed tools you may need to paste your PATH here>"
+        "PATH": "/usr/local/bin:/usr/bin:/bin"
       }
     }
   }
 }
 ```
+
+### 2. Self-Hosting with MCP Python SDK
+
+For advanced use cases, run your own MCP server using the [official Python MCP SDK](https://github.com/modelcontextprotocol/python-sdk).
+
+## Example Use Cases
+
+### Deployment Management
+```
+"Deploy the customer service miniapp to production environment"
+"Update the welcome message for the support bot application"
+```
+
+### Analytics & Monitoring  
+```
+"Show me all failed conversations from yesterday in the US region"
+"Get the dialog logs for session ID abc-123 to debug the issue"
+```
+
+### Configuration Management
+```
+"Find all miniapps that use the billing orchestrator flow"
+"Update the error message for when ASR fails to understand input"
+```
+
+### Operational Support
+```
+"Search for phone numbers containing area code 555"
+"List all environment variables in the production configuration"
+```
+
+## Authentication
+
+The server uses OAuth 2.0 with Keycloak for authentication to OCP services. Authentication is handled automatically through the `Authentication` class, which manages:
+
+- Token acquisition and refresh
+- Automatic token validation
+- Secure credential handling
+- Multi-region support (US, EU)
+
+## Development
+
+### Project Structure
+```
+src/
+├── main.py                 # MCP server entry point
+└── ocp/                   # OCP client modules
+    ├── base.py            # Base client with authentication
+    ├── authentication.py  # OAuth 2.0 authentication handler  
+    ├── miniapps.py        # MiniApps API client
+    ├── orchestrator.py    # Orchestrator API client
+    ├── insights.py        # Analytics API client
+    ├── integrations.py    # Integrations API client
+    └── environments_manager.py # Environment configuration client
+```
+
+### Running Tests
+```bash
+uv run pytest src/tests/
+```
+
+## Contributing
+
+1. Fork the repository
+2. Create a feature branch: `git checkout -b feature/new-capability`
+3. Make your changes and add tests
+4. Commit your changes: `git commit -am 'Add new capability'`  
+5. Push to the branch: `git push origin feature/new-capability`
+6. Submit a pull request
+
+## Support
+
+For issues and questions:
+- Check the [OCP Documentation](https://docs.ocp.ai) for platform-specific guidance
+- Review the [MCP Protocol Documentation](https://modelcontextprotocol.info/) for integration help
+- Contact your OCP administrator for authentication and access issues
+
 ---
+
+*The OCP Co-Pilot Server empowers teams to interact with the Omilia Cloud Platform through natural language, reducing operational overhead and enabling focus on innovation.*
