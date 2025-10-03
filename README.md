@@ -1,74 +1,313 @@
-# Omilia MCP Tools
+# OCP Co-Pilot Server
 
-This repository contains a set of tools for working with the Omilia Cloud Platform (OCP). These utilities help manage miniapps, orchestrator apps, and dialog logs.
+The **OCP Co-Pilot** is an intelligent assistant designed to augment the **Omilia Cloud Platform (OCP)** by leveraging **Large Language Models (LLMs)** and **AI Agents**. It streamlines interactions with OCP, automating complex tasks, guiding users through workflows, and enabling natural language control over platform operations.
 
-## Tools Overview
+With OCP Co-Pilot, developers, operators, and business teams can interact with the platform conversationally, reducing friction and improving efficiency across development, deployment, and monitoring activities.
 
-- **search_miniapps**: Search for miniapps by name or keyword.
-- **get_miniapp**: Retrieve details for a specific miniapp using its ID.
-- **set_miniapp_prompt**: Update prompts (welcome, error, reaction messages) for a miniapp.
-- **get_dialog_logs**: Fetch logs for a specific dialog session.
-- **search_orchestrator_apps**: Search for Orchestrator apps by keyword.
-- **get_orchestrator_app**: Retrieve the canvas (nodes and edges) for an Orchestrator app by ID.
-- **search_dialog_logs**: Search dialog logs with various filters (date, app, region, etc.).
-- **search_numbers**: Search for phone numbers with optional search term.
-- **search_variable_collections**: Search variable collections with optional search term.
-- **get_collection_variables**: Get a list of all variables in a collection by ID.
+## 🚀 Key Features
 
+* **Natural Language Interface**: Execute OCP actions and queries using plain language commands.
+* **Task Automation**: Handle repetitive and routine tasks (e.g., deployments, monitoring, configuration updates) through AI-driven automation.
+* **Context-Aware Assistance**: Understands user intent, OCP-specific terminology, and system state to provide relevant responses.
+* **Agentic Workflows**: Uses LLM-powered agents to plan, decompose, and execute multi-step tasks in OCP.
+* **Guided Operations**: Provides step-by-step support for complex processes such as environment setup, scaling, or troubleshooting.
+* **Extensibility**: Designed to plug into custom OCP APIs and services, allowing teams to extend capabilities easily.
+
+## 💡 Example Use Cases
+
+* **Deployment Automation**: "Deploy the latest version of the customer service app to staging."
+* **Monitoring & Alerts**: "Check the health of all voice AI services and alert me if latency exceeds threshold."
+* **Configuration Management**: "Update the ASR model configuration to use the new speech dataset."
+* **Knowledge Support**: "Explain how to set up a new tenant in OCP."
+* **Dialog Analysis**: "Show me all failed conversations from yesterday for the customer support app."
+* **System Troubleshooting**: "Find all dialog logs with errors in the past 24 hours."
+
+## 🛠️ Available Tools
+
+The Co-Pilot server provides a comprehensive set of tools for OCP management:
+
+### MiniApps Management
+- **search_miniapps**: Search for miniapps by name or keyword
+- **get_miniapp**: Retrieve details for a specific miniapp using its ID
+- **set_miniapp_prompt**: Update prompts (welcome, error, reaction messages) for a miniapp
+
+### Orchestrator Apps
+- **search_orchestrator_apps**: Search for Orchestrator apps by keyword
+- **get_orchestrator_app**: Retrieve the canvas (nodes and edges) for an Orchestrator app by ID
+
+### Analytics & Insights
+- **get_dialog_logs**: Fetch logs for a specific dialog session
+- **search_dialog_logs**: Search dialog logs with various filters (date, app, region, etc.)
+
+### System Integration
+- **search_numbers**: Search for phone numbers with optional search term
+- **search_variable_collections**: Search variable collections with optional search term  
+- **get_collection_variables**: Get a list of all variables in a collection by ID
 
 ---
 
-## Installation
+## 📦 Installation
 
-- Make sure you have **Python 3.10** or newer installed.
-- Install [uv](https://github.com/astral-sh/uv).
-- Clone this repository and navigate to the project directory.
-- Copy the file `.env.example` to `.env` and set the appropriate values.
-- Test if the istallation is correct by running `uv run mcp dev src/main.py`. This should open the mcp development server. Click on connect and try it out.
+### Prerequisites
+- **Python 3.10** or newer
+- [uv](https://github.com/astral-sh/uv) for dependency management
 
-## Usage
+### Setup Steps
 
-You can use these tools in two main ways:
+1. **Clone the repository**:
+   ```bash
+   git clone <repository-url>
+   cd ocp-copilot-server
+   ```
 
-### 1. Self-hosting (MCP Python SDK)
+2. **Install dependencies**:
+   ```bash
+   uv sync
+   ```
 
-You can run your own MCP server using the [official Python MCP SDK](https://github.com/modelcontextprotocol/python-sdk). This is the most flexible option and is recommended for advanced users. For full instructions, see the [MCP Python SDK README](https://github.com/modelcontextprotocol/python-sdk#running-your-server).
+3. **Environment Configuration**:
+   Create a `.env` file in the project root with your OCP credentials:
+   ```env
+   OCP_HOST=https://your-ocp-instance.com
+   OCP_USERNAME=your_username
+   OCP_PASSWORD=your_password
+   ```
 
-### 2. Local usage with Gemini CLI, Cursor, or Claude Desktop
+4. **Verify Installation**:
+   Test the installation by running the MCP development server:
+   ```bash
+   uv run mcp dev src/main.py
+   ```
+   This opens the MCP development server interface. Click "Connect" to test the tools.
 
-You can also use this project locally with any MCP-compatible client, such as:
+## 🏗️ Architecture
 
-- [Gemini CLI](https://github.com/google-gemini/gemini-cli)
-- [Cursor](https://www.cursor.com/)
-- [Claude Desktop](https://www.anthropic.com/claude)
+The OCP Co-Pilot Server is built using the [Model Context Protocol (MCP)](https://modelcontextprotocol.info/), which enables seamless integration with AI assistants and LLM applications. The server exposes OCP functionality through a standardized protocol that can be consumed by various AI clients.
 
-Each of these clients allows you to connect to local MCP servers. For more information, see their respective documentation:
-- [Gemini CLI: Configuring custom MCP servers](https://github.com/google-gemini/gemini-cli/blob/main/docs/tools/mcp-server.md#how-to-set-up-your-mcp-server)
-- [Claude Desktop: MCP servers](https://modelcontextprotocol.info/docs/quickstart/user/)
-- [Cursor: Configuring custom MCP servers](https://docs.cursor.com/context/model-context-protocol#manual-configuration)
+### Key Components
 
-#### Configuring MCP Servers
+- **MCP Server**: FastMCP-based server that exposes OCP tools
+- **Authentication Layer**: OAuth2/OpenID Connect integration with OCP
+- **Client Modules**: Specialized clients for different OCP services:
+  - **MiniAppsClient**: Manages voice applications and prompts
+  - **OrchestratorClient**: Handles complex dialog flows and canvases
+  - **InsightsClient**: Provides analytics and dialog log access
+  - **IntegrationsClient**: Manages phone numbers and external integrations
+  - **EnvironmentsManagerClient**: Handles variable collections and configurations
 
-To use this project with any of the above clients, you need to configure your MCP servers. For example, you can use the following `mcp.json` configuration (place it in the appropriate config directory for your client):
+### How It Works
 
+1. **AI Client** (Cursor, Claude Desktop, etc.) connects to the MCP server
+2. **User** issues natural language commands like "Show me failed dialogs from yesterday"
+3. **MCP Server** translates the request into appropriate OCP API calls
+4. **OCP APIs** return data which is processed and presented to the user
+
+This architecture enables the **Co-Pilot vision** by providing a conversational interface to OCP's complex functionality.
+
+## 🚀 Usage
+
+The OCP Co-Pilot Server can be integrated with various AI clients through the Model Context Protocol (MCP). Here are the main usage patterns:
+
+### 1. With AI Clients (Recommended)
+
+Connect the server to MCP-compatible AI clients for natural language interaction:
+
+#### Claude Desktop
+Add this configuration to your Claude Desktop MCP settings:
 ```json
 {
   "mcpServers": {
-    "Omilia MCP": {
+    "OCP Co-Pilot": {
       "command": "uv",
       "args": [
         "run",
-        "--with",
-        "mcp",
         "mcp",
         "run",
-        "<path_to_cloned_repository>>/omilia-mcp/src/main.py"
+        "/path/to/ocp-copilot-server/src/main.py"
       ],
       "env": {
-        "PATH": "<depending on how you installed the needed tools you may need to paste your PATH here>"
+        "PATH": "/usr/local/bin:/usr/bin:/bin"
       }
     }
   }
 }
 ```
+
+#### Cursor
+Configure in your Cursor MCP settings with the same configuration structure.
+
+#### Other MCP Clients
+- [Gemini CLI](https://github.com/google-gemini/gemini-cli)
+- Any application built with the [MCP Python SDK](https://github.com/modelcontextprotocol/python-sdk)
+
+### 2. Development Mode
+
+For development and testing:
+```bash
+uv run mcp dev src/main.py
+```
+This opens the MCP Inspector where you can test tools directly.
+
+### 3. Example Conversations
+
+Once connected to an AI client, you can use natural language commands:
+
+**Deployment Management:**
+```
+User: "Deploy the customer service miniapp to production"
+AI: I'll help you with that. Let me first search for the customer service miniapp...
+```
+
+**Analytics & Troubleshooting:**
+```
+User: "Show me all failed conversations from yesterday"
+AI: I'll search for dialog logs with errors from the past 24 hours...
+```
+
+**Configuration Updates:**
+```
+User: "Update the welcome message for the support app"
+AI: I'll help you update the welcome prompt. First, let me find the support app...
+```
+
+## 🔧 Tool Reference
+
+### MiniApps Management
+
+#### `search_miniapps(search_term?: string)`
+Search for miniapps by name or keyword.
+```typescript
+// Find all miniapps with "customer" in the name
+search_miniapps("customer")
+// List all miniapps
+search_miniapps()
+```
+
+#### `get_miniapp(miniapp_id: string)`
+Retrieve complete configuration for a specific miniapp.
+```typescript
+get_miniapp("12345")
+```
+
+#### `set_miniapp_prompt(miniapp_id: string, prompt_type: string, prompt: string)`
+Update various prompt types for a miniapp:
+- `"welcome"` - Welcome message
+- `"initial"` - Initial question prompt
+- `"error_no_interpretation"` - When system cannot interpret user input
+- `"error_no_response"` - When user provides no input
+- `"reaction_greeting"` - Response to user greetings
+
+### Orchestrator Apps
+
+#### `search_orchestrator_apps(search_term?: string)`
+Search for Orchestrator applications by keyword.
+
+#### `get_orchestrator_app(canvas_id: string)`
+Retrieve the complete canvas (dialog flow graph) for an Orchestrator app.
+
+### Analytics & Insights
+
+#### `get_dialog_logs(dialog_id: string)`
+Fetch complete conversation history and analytics for a specific dialog session.
+
+#### `search_dialog_logs(apps: string[], options?)`
+Advanced dialog log search with filtering options:
+- `from_date` / `to_date`: Time range filtering
+- `ani`: Filter by phone numbers
+- `region`: Filter by geographic region
+- `steps_gt`: Filter conversations with more than N steps
+
+### System Integration
+
+#### `search_numbers(search_term?: string)`
+Search for configured phone numbers in the system.
+
+#### `search_variable_collections(search_term?: string)`
+Find variable collections used across environments.
+
+#### `get_collection_variables(collection_id: string)`
+List all variables within a specific collection.
+
+## 🔐 Security & Authentication
+
+The OCP Co-Pilot Server uses OAuth2/OpenID Connect for secure authentication with OCP:
+
+- **Token Management**: Automatic token acquisition, refresh, and revocation
+- **Secure Storage**: Credentials stored in environment variables
+- **Session Management**: Intelligent token caching and expiry handling
+
+### Required Permissions
+
+Ensure your OCP user account has appropriate permissions for:
+- Reading miniapp configurations
+- Updating miniapp prompts (if modification is needed)
+- Accessing dialog logs and analytics
+- Viewing orchestrator canvases
+- Managing system integrations
+
+## 🚦 Development & Testing
+
+### Running Tests
+```bash
+uv run pytest src/tests/
+```
+
+### Code Quality
+The project follows Python best practices:
+- Type hints for better code clarity
+- Comprehensive error handling
+- Modular client architecture
+- Extensive logging and debugging support
+
+### Adding New Tools
+To extend the Co-Pilot with new OCP functionality:
+
+1. Create a new client module in `src/ocp/`
+2. Extend the base client class
+3. Add MCP tool functions in `src/main.py`
+4. Update documentation and tests
+
+## 📊 Monitoring & Observability
+
+The server provides logging and monitoring capabilities:
+- Authentication status and token lifecycle
+- API request/response logging
+- Error tracking and diagnostics
+- Performance metrics for tool execution
+
+## 🌟 Vision & Future
+
+The OCP Co-Pilot represents a fundamental shift in how teams interact with complex cloud platforms. By providing a **conversational interface** to OCP's powerful capabilities, it transforms operational complexity into natural language simplicity.
+
+### Roadmap
+
+- **Enhanced AI Workflows**: More sophisticated multi-step task automation
+- **Predictive Analytics**: Proactive monitoring and issue detection
+- **Custom Integrations**: Plugin architecture for custom OCP extensions
+- **Multi-Modal Interface**: Support for voice, visual, and text interactions
+- **Team Collaboration**: Shared contexts and collaborative workflows
+
+The Co-Pilot is more than just an assistant—it's a **collaborative partner** that empowers teams to focus on innovation while reducing operational overhead.
+
+## 📝 License
+
+[Add appropriate license information]
+
+## 🤝 Contributing
+
+We welcome contributions! Please see our contributing guidelines for details on:
+- Code style and standards
+- Testing requirements
+- Pull request process
+- Issue reporting
+
+## 📞 Support
+
+For support and questions:
+- Technical documentation: [Link to docs]
+- Issue tracking: [Link to issue tracker]
+- Community: [Link to community channels]
+
 ---
+
+**Built with ❤️ for the OCP Community**

@@ -1,12 +1,13 @@
 [project]
-name = "mcp-test"
+name = "ocp-copilot-server"
 version = "0.1.0"
-description = "Add your description here"
+description = "OCP Co-Pilot Server - An intelligent assistant for the Omilia Cloud Platform using MCP"
 readme = "README.md"
 requires-python = ">=3.10"
 dependencies = [
     "mcp[cli]>=1.9.4",
     "requests>=2.32.4",
+    "python-dotenv>=1.0.0",
 ]
 
 [project.optional-dependencies]
