@@ -1,0 +1,430 @@
+{
+  "schema_version": 1,
+  "filter_version": "0.1.0",
+  "internal_sha": "333d04b1f44b7f54b0803eba5c1631dd8b101444",
+  "internal_parent_sha": "0fa1bdf398fb6efde0756a997df77ccb9f876d3c",
+  "public_branch": "mirror/333d04b1f44b",
+  "files": [
+    {
+      "path": ".mcpbignore",
+      "size": 1423,
+      "sha256": "c029aded1e62f5a9d4b4fbdac142a5102177123bb539722fb4844d4d1e7a59d8"
+    },
+    {
+      "path": "LICENSE",
+      "size": 1095,
+      "sha256": "0046a54e84fa3995663174a3a15a633f27119a75e4edb4333ebd890bd8f6beec"
+    },
+    {
+      "path": "README.md",
+      "size": 4538,
+      "sha256": "37f39aafe6a55e5f147e96f21895aa52982b5e971f76386f76bd0f78eca0eb23"
+    },
+    {
+      "path": "STATUS.md",
+      "size": 1764,
+      "sha256": "44530cbf716699a026b7927c46f0ab01a1908bc835330e2e3ec22d8f002c5b34"
+    },
+    {
+      "path": "bin/ocp-mcp.js",
+      "size": 112,
+      "sha256": "cc63205aeee43e5886f30f34026d3b8f847124ea9d600fc39d7e5ae9165bd317"
+    },
+    {
+      "path": "docs/examples/build-and-test-concierge-app.md",
+      "size": 8332,
+      "sha256": "1e958013dd10ed24203be90ea21cec42ea1c7f76c6bc6fa6d32f9902929820c3"
+    },
+    {
+      "path": "docs/installation.md",
+      "size": 10321,
+      "sha256": "3f7d5c3c2c19e7be5ab1c13f13fc242ceb651075748852abfb4f8eb8602d4067"
+    },
+    {
+      "path": "lib/cli.js",
+      "size": 7777,
+      "sha256": "e6e51cfab31c202031b8c04887f001df6551515c444e689306a4c23d71f502aa"
+    },
+    {
+      "path": "lib/config.js",
+      "size": 5586,
+      "sha256": "62e4daf54dd91381def11347e5c57e5b08c81b8e54a3a896fa71253a284d2eba"
+    },
+    {
+      "path": "lib/runtime.js",
+      "size": 2508,
+      "sha256": "22005ac8f7fbb82b60888a2b8dadf31167fd968a27118809804d69474bbc5dbd"
+    },
+    {
+      "path": "manifest.json",
+      "size": 995,
+      "sha256": "bedac1328cee7018c7744796c1dbaea2b9efbab7db99fd66f1bc228df4132437"
+    },
+    {
+      "path": "ocp-mcp-server.mcpb",
+      "size": 160858,
+      "sha256": "5a8d5650aa907874c6c7c1b640274176d8930d1a83a56c16a3ffd8c1c4f582b4"
+    },
+    {
+      "path": "package-lock.json",
+      "size": 313,
+      "sha256": "c57b543d1bf6c3217b99a08116df25c0b444becb3da5f6c69b570e6165912d5b"
+    },
+    {
+      "path": "package.json",
+      "size": 1170,
+      "sha256": "5258cedf86c455059596b4931961f026b967fda4fdd5419d4a203f774817f789"
+    },
+    {
+      "path": "pyproject.toml",
+      "size": 276,
+      "sha256": "3ccc87a0b566836937d1302c457896a641223c6882801080cbdf78fdf7903869"
+    },
+    {
+      "path": "scripts/sync-python.js",
+      "size": 2917,
+      "sha256": "338ebcd8f68f3d53148f94320b6c7ad84cd92d083e6231d8851c01199fdfbd25"
+    },
+    {
+      "path": "src/dependencies.py",
+      "size": 870,
+      "sha256": "d03f62762d0d9dea096571f41fc08cf1e66d680726a823799bc404efd73b8a6f"
+    },
+    {
+      "path": "src/guides/add_knowledge.md",
+      "size": 1679,
+      "sha256": "a5db88e1cc59ac7b45b9cd6e09bcb431b030abf9aef6caf86ccaa920cc335a40"
+    },
+    {
+      "path": "src/guides/build_concierge_app.md",
+      "size": 2277,
+      "sha256": "9dc9410279e9e897f74ca74bb5b989430a37e3f4120c5ecd852ac36322801c52"
+    },
+    {
+      "path": "src/guides/index.md",
+      "size": 695,
+      "sha256": "c48099bc467be0d97851510efd5c35ba0511262489fc2b95f9aaa2c8d0b82e82"
+    },
+    {
+      "path": "src/guides/test_and_improve.md",
+      "size": 2928,
+      "sha256": "a2c70c9d2c26b4aeb8243259ebab7e57983bc7a94eff9d9dc0a63d1bcb3616f5"
+    },
+    {
+      "path": "src/main.py",
+      "size": 30494,
+      "sha256": "f7f2aec8771516c6f6b109e1f941ab523e41bed4cf9f93afbbd7b13f8a01dcf4"
+    },
+    {
+      "path": "src/ocp/authentication.py",
+      "size": 11862,
+      "sha256": "1df80785a9d5c1d0ac3c56fccae026a869ec55184122d93113aa4dbceb2eb4ee"
+    },
+    {
+      "path": "src/ocp/base.py",
+      "size": 14244,
+      "sha256": "f507eb91fa9daafe482a0bf6fbc434eb83f2d9ded4e5f0352083afa65aabf69f"
+    },
+    {
+      "path": "src/ocp/chat.py",
+      "size": 11701,
+      "sha256": "4ad4c64bc7415798513aecebe1576e7ad882937cf85699fdabe633416cdaf096"
+    },
+    {
+      "path": "src/ocp/environments_manager.py",
+      "size": 636,
+      "sha256": "60f5f1adb9d2da2a3cafe07ec665f312354d05bd85b651e59e75f421edf0cd8d"
+    },
+    {
+      "path": "src/ocp/insights.py",
+      "size": 3428,
+      "sha256": "8c8cdddb886a7d592a451be21aef3374a2e69cd6290daf8cf4d03810426b29e6"
+    },
+    {
+      "path": "src/ocp/integrations.py",
+      "size": 602,
+      "sha256": "c32b59f1ff433bf69f286086d3f38bc0e7c897783d167750ad6eb9e3758fb017"
+    },
+    {
+      "path": "src/ocp/miniapps.py",
+      "size": 6241,
+      "sha256": "80676ecf21f471387369651345a63bf4f0851ebbd002dd7377f0083240689770"
+    },
+    {
+      "path": "src/ocp/orchestrator.py",
+      "size": 10553,
+      "sha256": "d811c71b3b6fdd25bba0d947d1308f6462134e45eb8aed5ac92aeac986d98cad"
+    },
+    {
+      "path": "src/ocp/pathfinder.py",
+      "size": 3838,
+      "sha256": "b403ed8216f32727f7005dcadb0dfcdf222c5d2d34c87038d64452d0182ec5e5"
+    },
+    {
+      "path": "src/payload_schemas.py",
+      "size": 1020,
+      "sha256": "45db1525c21a09a93668c837ce09c87ffaa01862e9447dd5dbe5e9f8fa57e187"
+    },
+    {
+      "path": "src/server.py",
+      "size": 14523,
+      "sha256": "eea0387a9672c2838b8a8e523cea7a73c2ae285d3be6e9906824b52495c7b5ca"
+    },
+    {
+      "path": "src/tags.py",
+      "size": 788,
+      "sha256": "ffe21cabc4ac35edff5697d779e7818db6ae77fb930c075fd3553abda23f8681"
+    },
+    {
+      "path": "src/tool_decorators.py",
+      "size": 5214,
+      "sha256": "82a2842a8fab3a3da54e7e2873343a98e627d4dd1d1a2ec9898920551819889b"
+    },
+    {
+      "path": "src/utils.py",
+      "size": 8319,
+      "sha256": "a677eb37aacae3570679b68ee19222e678e6e458962278ba80fca2763e6dc6c4"
+    },
+    {
+      "path": "test/cli.test.js",
+      "size": 11068,
+      "sha256": "b1c9691a4ed33fd382f23fa0ee4f07b5a62c3c25966fef564315289e913c8137"
+    },
+    {
+      "path": "vendor/python/pyproject.toml",
+      "size": 276,
+      "sha256": "3ccc87a0b566836937d1302c457896a641223c6882801080cbdf78fdf7903869"
+    },
+    {
+      "path": "vendor/python/src/dependencies.py",
+      "size": 870,
+      "sha256": "d03f62762d0d9dea096571f41fc08cf1e66d680726a823799bc404efd73b8a6f"
+    },
+    {
+      "path": "vendor/python/src/guides/add_knowledge.md",
+      "size": 1679,
+      "sha256": "a5db88e1cc59ac7b45b9cd6e09bcb431b030abf9aef6caf86ccaa920cc335a40"
+    },
+    {
+      "path": "vendor/python/src/guides/build_concierge_app.md",
+      "size": 2277,
+      "sha256": "9dc9410279e9e897f74ca74bb5b989430a37e3f4120c5ecd852ac36322801c52"
+    },
+    {
+      "path": "vendor/python/src/guides/index.md",
+      "size": 695,
+      "sha256": "c48099bc467be0d97851510efd5c35ba0511262489fc2b95f9aaa2c8d0b82e82"
+    },
+    {
+      "path": "vendor/python/src/guides/test_and_improve.md",
+      "size": 2928,
+      "sha256": "a2c70c9d2c26b4aeb8243259ebab7e57983bc7a94eff9d9dc0a63d1bcb3616f5"
+    },
+    {
+      "path": "vendor/python/src/main.py",
+      "size": 30494,
+      "sha256": "f7f2aec8771516c6f6b109e1f941ab523e41bed4cf9f93afbbd7b13f8a01dcf4"
+    },
+    {
+      "path": "vendor/python/src/ocp/authentication.py",
+      "size": 11862,
+      "sha256": "1df80785a9d5c1d0ac3c56fccae026a869ec55184122d93113aa4dbceb2eb4ee"
+    },
+    {
+      "path": "vendor/python/src/ocp/base.py",
+      "size": 14244,
+      "sha256": "f507eb91fa9daafe482a0bf6fbc434eb83f2d9ded4e5f0352083afa65aabf69f"
+    },
+    {
+      "path": "vendor/python/src/ocp/chat.py",
+      "size": 11701,
+      "sha256": "4ad4c64bc7415798513aecebe1576e7ad882937cf85699fdabe633416cdaf096"
+    },
+    {
+      "path": "vendor/python/src/ocp/environments_manager.py",
+      "size": 636,
+      "sha256": "60f5f1adb9d2da2a3cafe07ec665f312354d05bd85b651e59e75f421edf0cd8d"
+    },
+    {
+      "path": "vendor/python/src/ocp/insights.py",
+      "size": 3428,
+      "sha256": "8c8cdddb886a7d592a451be21aef3374a2e69cd6290daf8cf4d03810426b29e6"
+    },
+    {
+      "path": "vendor/python/src/ocp/integrations.py",
+      "size": 602,
+      "sha256": "c32b59f1ff433bf69f286086d3f38bc0e7c897783d167750ad6eb9e3758fb017"
+    },
+    {
+      "path": "vendor/python/src/ocp/miniapps.py",
+      "size": 6241,
+      "sha256": "80676ecf21f471387369651345a63bf4f0851ebbd002dd7377f0083240689770"
+    },
+    {
+      "path": "vendor/python/src/ocp/orchestrator.py",
+      "size": 10553,
+      "sha256": "d811c71b3b6fdd25bba0d947d1308f6462134e45eb8aed5ac92aeac986d98cad"
+    },
+    {
+      "path": "vendor/python/src/ocp/pathfinder.py",
+      "size": 3838,
+      "sha256": "b403ed8216f32727f7005dcadb0dfcdf222c5d2d34c87038d64452d0182ec5e5"
+    },
+    {
+      "path": "vendor/python/src/payload_schemas.py",
+      "size": 1020,
+      "sha256": "45db1525c21a09a93668c837ce09c87ffaa01862e9447dd5dbe5e9f8fa57e187"
+    },
+    {
+      "path": "vendor/python/src/server.py",
+      "size": 14523,
+      "sha256": "eea0387a9672c2838b8a8e523cea7a73c2ae285d3be6e9906824b52495c7b5ca"
+    },
+    {
+      "path": "vendor/python/src/tags.py",
+      "size": 788,
+      "sha256": "ffe21cabc4ac35edff5697d779e7818db6ae77fb930c075fd3553abda23f8681"
+    },
+    {
+      "path": "vendor/python/src/tool_decorators.py",
+      "size": 5214,
+      "sha256": "82a2842a8fab3a3da54e7e2873343a98e627d4dd1d1a2ec9898920551819889b"
+    },
+    {
+      "path": "vendor/python/src/utils.py",
+      "size": 8319,
+      "sha256": "a677eb37aacae3570679b68ee19222e678e6e458962278ba80fca2763e6dc6c4"
+    },
+    {
+      "path": "vendor/python/uv.lock",
+      "size": 303151,
+      "sha256": "6bc189a8542dab55729779333423c439990bb0f21a6d0b7111622f62515d2659"
+    }
+  ],
+  "public_tools": [
+    {
+      "entrypoint": "src/main.py",
+      "tool": "add_concierge_to_orc_app"
+    },
+    {
+      "entrypoint": "src/main.py",
+      "tool": "create_agent"
+    },
+    {
+      "entrypoint": "src/main.py",
+      "tool": "create_orchestrator_app"
+    },
+    {
+      "entrypoint": "src/main.py",
+      "tool": "create_pathfinder_project"
+    },
+    {
+      "entrypoint": "src/main.py",
+      "tool": "create_webservice_miniapp"
+    },
+    {
+      "entrypoint": "src/main.py",
+      "tool": "deploy_orc_app"
+    },
+    {
+      "entrypoint": "src/main.py",
+      "tool": "edit_webservice_miniapp"
+    },
+    {
+      "entrypoint": "src/main.py",
+      "tool": "get_collection_variables"
+    },
+    {
+      "entrypoint": "src/main.py",
+      "tool": "get_dialog_logs"
+    },
+    {
+      "entrypoint": "src/main.py",
+      "tool": "get_miniapp"
+    },
+    {
+      "entrypoint": "src/main.py",
+      "tool": "get_orchestrator_app"
+    },
+    {
+      "entrypoint": "src/main.py",
+      "tool": "list_agents"
+    },
+    {
+      "entrypoint": "src/main.py",
+      "tool": "list_groups"
+    },
+    {
+      "entrypoint": "src/main.py",
+      "tool": "list_pathfinder_projects"
+    },
+    {
+      "entrypoint": "src/main.py",
+      "tool": "read_guide"
+    },
+    {
+      "entrypoint": "src/main.py",
+      "tool": "search_dialog_logs"
+    },
+    {
+      "entrypoint": "src/main.py",
+      "tool": "search_miniapps"
+    },
+    {
+      "entrypoint": "src/main.py",
+      "tool": "search_numbers"
+    },
+    {
+      "entrypoint": "src/main.py",
+      "tool": "search_orchestrator_apps"
+    },
+    {
+      "entrypoint": "src/main.py",
+      "tool": "search_variable_collections"
+    },
+    {
+      "entrypoint": "src/main.py",
+      "tool": "set_miniapp_prompt"
+    },
+    {
+      "entrypoint": "src/main.py",
+      "tool": "talk_to_app"
+    },
+    {
+      "entrypoint": "src/main.py",
+      "tool": "update_agent_instructions"
+    },
+    {
+      "entrypoint": "src/server.py",
+      "tool": "add_agent_to_concierge"
+    },
+    {
+      "entrypoint": "src/server.py",
+      "tool": "add_escalation_queue_to_agent"
+    },
+    {
+      "entrypoint": "src/server.py",
+      "tool": "add_faq_to_agent"
+    },
+    {
+      "entrypoint": "src/server.py",
+      "tool": "add_knowledge_base_to_agent"
+    },
+    {
+      "entrypoint": "src/server.py",
+      "tool": "add_tool_to_webservice_agent"
+    },
+    {
+      "entrypoint": "src/server.py",
+      "tool": "create_webservice_agent"
+    },
+    {
+      "entrypoint": "src/server.py",
+      "tool": "list_knowledge_bases"
+    },
+    {
+      "entrypoint": "src/server.py",
+      "tool": "update_concierge"
+    }
+  ]
+}

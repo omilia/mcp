@@ -1,0 +1,37 @@
+{
+  "manifest_version": "0.2",
+  "name": "OCP MCP Server",
+  "version": "0.1.0",
+  "description": "Omilia Cloud Platform MCP Server — manage orchestrator apps, agents, miniapps, NLU models, pathfinder, and more.",
+  "author": {
+    "name": "Omilia"
+  },
+  "server": {
+    "type": "node",
+    "entry_point": "bin/ocp-mcp.js",
+    "mcp_config": {
+      "command": "node",
+      "args": ["${__dirname}/bin/ocp-mcp.js", "run"],
+      "env": {
+        "OCP_BASE_URL": "${OCP_BASE_URL}",
+        "OCP_ACCESS_TOKEN": "${OCP_ACCESS_TOKEN}"
+      }
+    }
+  },
+  "user_config": {
+    "OCP_BASE_URL": {
+      "type": "string",
+      "title": "OCP Base URL",
+      "description": "Your OCP instance URL (e.g. https://pub.demo.ocp.ai)",
+      "required": true
+    },
+    "OCP_ACCESS_TOKEN": {
+      "type": "string",
+      "title": "Personal Access Token",
+      "description": "OCP personal access token for authentication",
+      "required": true,
+      "sensitive": true
+    }
+  },
+  "license": "MIT"
+}

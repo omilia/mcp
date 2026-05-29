@@ -1,0 +1,56 @@
+{
+  "name": "@omilia/mcp-server",
+  "version": "0.1.0",
+  "description": "Model Context Protocol (MCP) server for the Omilia Cloud Platform — build agents, attach knowledge, deploy, and chat with deployed apps from any MCP-aware client.",
+  "type": "module",
+  "bin": "./bin/ocp-mcp.js",
+  "scripts": {
+    "test": "node --test"
+  },
+  "engines": {
+    "node": ">=20"
+  },
+  "files": [
+    "bin/",
+    "lib/",
+    "scripts/",
+    "vendor/python/",
+    "README.md",
+    "LICENSE"
+  ],
+  "keywords": [
+    "mcp",
+    "model-context-protocol",
+    "ocp",
+    "omilia",
+    "cloud-platform",
+    "orchestrator",
+    "concierge",
+    "agent",
+    "miniapp",
+    "pathfinder",
+    "nlu",
+    "conversational-ai",
+    "fastmcp",
+    "claude",
+    "claude-desktop",
+    "cursor"
+  ],
+  "homepage": "https://learn.ocp.ai",
+  "bugs": {
+    "url": "https://github.com/omilia/mcp/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/omilia/mcp.git"
+  },
+  "author": {
+    "name": "Omilia",
+    "url": "https://www.omilia.com"
+  },
+  "license": "MIT",
+  "publishConfig": {
+    "access": "public",
+    "registry": "https://registry.npmjs.org/"
+  }
+}

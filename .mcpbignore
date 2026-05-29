@@ -1,0 +1,43 @@
+# .mcpbignore — exclude mirror-build artifacts and non-runtime files from
+# the Anthropic .mcpb bundle. Applies whether `mcpb pack` runs against the
+# upstream `npm/` directory or the post-filter mirror tree (which carries
+# the same npm-package layout at root, plus mirror-level extras).
+#
+# Patterns MUST be anchored to the bundle root with a leading `/`; an
+# unanchored `src/` would also match `vendor/python/src/` and strip the
+# Python runtime.
+#
+# What the .mcpb actually needs at runtime:
+#   manifest.json
+#   bin/ocp-mcp.js            (called by manifest's mcp_config)
+#   lib/{cli,config,runtime}.js
+#   vendor/python/src/        (server.py + transitive deps)
+#   vendor/python/pyproject.toml + uv.lock
+#   package.json              (Node package metadata)
+#   README.md, LICENSE        (customary)
+
+# Filter output at the mirror root — runtime reads `vendor/python/src/`.
+/src/
+/docs/
+/.planning/
+/STATUS.md
+/CHANGELOG.md
+/.compliance-violations.json
+/.mirror-manifest.json
+/.mirror-run-meta.json
+/.public-mirror-denylist
+/.public-mirror-denylist-exceptions
+/.public-mirror-pyproject-overrides.toml
+
+# Root-level Python project config — runtime uses vendor/python/ only.
+/pyproject.toml
+/uv.lock
+
+# npm lockfile, prepack script wrapper, test sources — install-time only.
+/package-lock.json
+/scripts/
+/test/
+
+# Repo housekeeping that has no place in an installable extension.
+/.gitignore
+/.gitlab-ci.yml
