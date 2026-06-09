@@ -38,10 +38,10 @@ Requirements for this milestone. Each maps to a roadmap phase.
 
 ### Tests
 
-- [ ] **TST-01**: `test/cli.test.js` covers the interactive wizard prompt flow (client/auth/credential collection)
-- [ ] **TST-02**: Tests cover the `claude mcp add` invocation for Claude Code (including the CLI-absent fallback)
-- [ ] **TST-03**: Tests cover config writing to the correct location for each supported client
-- [ ] **TST-04**: Tests cover flag-driven (non-interactive) invocations remaining backward-compatible
+- [x] **TST-01**: `test/cli.test.js` covers the interactive wizard prompt flow (client/auth/credential collection)
+- [x] **TST-02**: Tests cover the `claude mcp add` invocation for Claude Code (including the CLI-absent fallback)
+- [x] **TST-03**: Tests cover config writing to the correct location for each supported client
+- [x] **TST-04**: Tests cover flag-driven (non-interactive) invocations remaining backward-compatible
 
 ## v2 Requirements
 
@@ -84,10 +84,10 @@ Deferred to a future milestone.
 | DOC-01 | Phase 4 | Complete |
 | DOC-02 | Phase 4 | Complete |
 | DOC-03 | Phase 4 | Complete |
-| TST-01 | Phase 4 | Pending |
-| TST-02 | Phase 4 | Pending |
-| TST-03 | Phase 4 | Pending |
-| TST-04 | Phase 4 | Pending |
+| TST-01 | Phase 4 | Complete |
+| TST-02 | Phase 4 | Complete |
+| TST-03 | Phase 4 | Complete |
+| TST-04 | Phase 4 | Complete |
 
 **Coverage:**
 - v1 requirements: 21 total

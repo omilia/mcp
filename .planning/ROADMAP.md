@@ -73,7 +73,7 @@ Decimal phases appear between their surrounding integers in numeric order.
   4. `test/cli.test.js` has passing tests for: wizard prompt flow, `claude mcp add` invocation (including absent-CLI fallback), config writes to correct locations per client, and fully-flagged non-interactive invocations
 **Plans**: 2 plans
 - [x] 04-01-PLAN.md — Reconcile README.md + docs/installation.md: assert GitHub spec, document `claude mcp add` Claude Code path, add interactive wizard section, flag Confluence guide for manual sync (DOC-01/02/03)
-- [ ] 04-02-PLAN.md — Audit existing tests against TST-01..04, produce coverage map (docs/test-coverage-map.md), add only genuine gap-fill tests; keep suite green (TST-01/02/03/04)
+- [x] 04-02-PLAN.md — Audit existing tests against TST-01..04, produce coverage map (docs/test-coverage-map.md), add only genuine gap-fill tests; keep suite green (TST-01/02/03/04)
 
 ## Progress
 
