@@ -32,7 +32,7 @@ Decimal phases appear between their surrounding integers in numeric order.
 **Plans**: 3 plans
 - [x] 01-01-PLAN.md — Pure wizard-decision layer (lib/wizard.js): needsPrompting, flag/answer merge, secret masking, confirmation summary, no-TTY error
 - [x] 01-02-PLAN.md — Interactive I/O layer (lib/prompts.js, non-echoing askSecret) + async runWizard orchestrator (client/auth/credentials)
-- [ ] 01-03-PLAN.md — Wire wizard into runInit + async bin entry; integration tests (launch, no-TTY guard, non-interactive, masking, golden-SHA preserved)
+- [x] 01-03-PLAN.md — Wire wizard into runInit + async bin entry; integration tests (launch, no-TTY guard, non-interactive, masking, golden-SHA preserved)
 
 ### Phase 2: Client Install Paths
 **Goal**: Claude Code installs via `claude mcp add` to the correct location; Claude Desktop installs end-to-end; all emitted config uses the GitHub distribution spec
