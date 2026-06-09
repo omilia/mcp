@@ -43,7 +43,10 @@ Decimal phases appear between their surrounding integers in numeric order.
   2. When `claude` is not on PATH, the tool prints an installable config snippet and actionable instructions instead of failing silently
   3. Claude Desktop install path writes config to the correct platform location and/or uses the `.mcpb` bundle — verified end-to-end
   4. Every generated or written config block uses `npx -y github:omilia/mcp run` as the command, consistently across all clients
-**Plans**: TBD
+**Plans**: 3 plans
+- [ ] 02-01-PLAN.md — Fix stale fixtures (Cursor args + PAT golden SHA) so the full suite is green on the GitHub spec (CLI-05)
+- [ ] 02-02-PLAN.md — Claude Code install via `claude mcp add` (injectable spawn, argv array); remove `~/.claude/settings.json` path; CLI-absent masked fallback (CLI-01/02/03)
+- [ ] 02-03-PLAN.md — Claude Desktop write-path end-to-end verification + `.mcpb` manifest/env consistency (CLI-04/05)
 **UI hint**: yes
 
 ### Phase 3: Install Verification
@@ -75,6 +78,6 @@ Phases execute in numeric order: 1 → 2 → 3 → 4
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
 | 1. Interactive Wizard | 0/3 | Planned | - |
-| 2. Client Install Paths | 0/? | Not started | - |
+| 2. Client Install Paths | 0/3 | Planned | - |
 | 3. Install Verification | 0/? | Not started | - |
 | 4. Docs & Tests | 0/? | Not started | - |
