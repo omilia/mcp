@@ -1,4 +1,5 @@
 import assert from "node:assert/strict";
+import { Readable, Writable } from "node:stream";
 import test from "node:test";
 
 import {
@@ -11,6 +12,34 @@ import {
   needsPrompting,
   requiredFieldsFor
 } from "../lib/wizard.js";
+import { askChoice, askSecret, askText } from "../lib/prompts.js";
+
+// ─── Scripted I/O helpers ─────────────────────────────────────────────────────
+
+/**
+ * createScriptedIo(lines) — returns { io, getOutput }
+ *
+ * io.input is a Readable that emits the given lines (each suffixed with "\n").
+ * io.output is a Writable that captures all written bytes.
+ * getOutput() returns the captured string.
+ */
+function createScriptedIo(lines) {
+  const inputData = lines.map((l) => `${l}\n`).join("");
+  const input = Readable.from([inputData]);
+
+  let captured = "";
+  const output = new Writable({
+    write(chunk, _enc, cb) {
+      captured += chunk.toString();
+      cb();
+    }
+  });
+
+  return {
+    io: { input, output },
+    getOutput: () => captured
+  };
+}
 
 // ─── PROMPT_FIELDS shape ──────────────────────────────────────────────────────
 
@@ -343,4 +372,99 @@ test("buildNoTtyError does not throw — returns string for caller to handle", (
   // Must be callable without throwing
   assert.doesNotThrow(() => buildNoTtyError([]));
   assert.doesNotThrow(() => buildNoTtyError(["client", "accessToken"]));
+});
+
+// ─── askChoice ────────────────────────────────────────────────────────────────
+
+test("askChoice resolves to choice value when index entered", async () => {
+  const choices = [{ value: "claude-code", label: "Claude Code" }, { value: "claude", label: "Claude Desktop" }];
+  const { io } = createScriptedIo(["2"]);
+  const result = await askChoice("Pick client", choices, io);
+  assert.equal(result, "claude");
+});
+
+test("askChoice resolves to choice value when value string entered", async () => {
+  const choices = [{ value: "claude-code", label: "Claude Code" }, { value: "claude", label: "Claude Desktop" }];
+  const { io } = createScriptedIo(["claude-code"]);
+  const result = await askChoice("Pick client", choices, io);
+  assert.equal(result, "claude-code");
+});
+
+test("askChoice re-prompts on invalid input and then accepts valid input", async () => {
+  const choices = [{ value: "pat", label: "PAT" }, { value: "keycloak", label: "Keycloak" }];
+  // First input is invalid, second is valid
+  const { io, getOutput } = createScriptedIo(["99", "1"]);
+  const result = await askChoice("Auth method", choices, io);
+  assert.equal(result, "pat");
+  // The label must appear in the output (at least once for the initial prompt)
+  assert.ok(getOutput().includes("Auth method"), "label must appear in output");
+});
+
+test("askChoice writes the label and enumerated choices to output", async () => {
+  const choices = [{ value: "claude-code", label: "Claude Code" }, { value: "claude", label: "Claude Desktop" }];
+  const { io, getOutput } = createScriptedIo(["1"]);
+  await askChoice("Select client", choices, io);
+  const out = getOutput();
+  assert.ok(out.includes("Select client"), "label must be present in output");
+  assert.ok(out.includes("Claude Code"), "choice label must appear in output");
+  assert.ok(out.includes("Claude Desktop"), "choice label must appear in output");
+});
+
+// ─── askText ──────────────────────────────────────────────────────────────────
+
+test("askText resolves to entered text trimmed", async () => {
+  const { io } = createScriptedIo(["  https://ocp.example.com  "]);
+  const result = await askText("Base URL", {}, io);
+  assert.equal(result, "https://ocp.example.com");
+});
+
+test("askText returns defaultValue when empty line entered and default provided", async () => {
+  const { io } = createScriptedIo([""]);
+  const result = await askText("Realm", { defaultValue: "master" }, io);
+  assert.equal(result, "master");
+});
+
+test("askText re-prompts when empty line entered and no default", async () => {
+  const { io } = createScriptedIo(["", "myvalue"]);
+  const result = await askText("Required field", {}, io);
+  assert.equal(result, "myvalue");
+});
+
+test("askText writes the prompt label to output", async () => {
+  const { io, getOutput } = createScriptedIo(["somevalue"]);
+  await askText("Enter URL", {}, io);
+  assert.ok(getOutput().includes("Enter URL"), "label must appear in output");
+});
+
+// ─── askSecret ────────────────────────────────────────────────────────────────
+
+test("askSecret resolves to the entered secret", async () => {
+  const { io } = createScriptedIo(["topsecret"]);
+  const result = await askSecret("Access Token", io);
+  assert.equal(result, "topsecret");
+});
+
+test("askSecret: captured output CONTAINS the prompt label", async () => {
+  const { io, getOutput } = createScriptedIo(["topsecret"]);
+  await askSecret("Access Token", io);
+  assert.ok(getOutput().includes("Access Token"), "prompt label must appear in captured output");
+});
+
+test("askSecret: captured output does NOT contain the entered secret", async () => {
+  const secret = "topsecret";
+  const { io, getOutput } = createScriptedIo([secret]);
+  await askSecret("Access Token", io);
+  assert.ok(
+    !getOutput().includes(secret),
+    `captured output must NOT contain the secret, got: ${getOutput()}`
+  );
+});
+
+test("askSecret acceptance criteria: label 'Access Token' present, secret 'topsecret' absent", async () => {
+  // Matches the explicit acceptance criteria from the plan
+  const { io, getOutput } = createScriptedIo(["topsecret"]);
+  const result = await askSecret("Access Token", io);
+  assert.equal(result, "topsecret", "must resolve to the entered value");
+  assert.ok(getOutput().includes("Access Token"), "output must contain the label");
+  assert.ok(!getOutput().includes("topsecret"), "output must NOT contain the secret");
 });
