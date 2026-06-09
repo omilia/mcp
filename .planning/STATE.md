@@ -4,14 +4,14 @@ milestone: v1.0
 milestone_name: milestone
 status: executing
 stopped_at: Roadmap created — ready to plan Phase 1
-last_updated: "2026-06-09T11:27:51.113Z"
+last_updated: "2026-06-09T11:36:28.245Z"
 last_activity: 2026-06-09
 progress:
   total_phases: 4
   completed_phases: 0
   total_plans: 3
-  completed_plans: 1
-  percent: 33
+  completed_plans: 2
+  percent: 67
 ---
 
 # Project State
@@ -26,11 +26,11 @@ See: .planning/PROJECT.md (updated 2026-06-09)
 ## Current Position
 
 Phase: 01 (interactive-wizard) — EXECUTING
-Plan: 2 of 3
+Plan: 3 of 3
 Status: Ready to execute
 Last activity: 2026-06-09
 
-Progress: [███░░░░░░░] 33%
+Progress: [███████░░░] 67%
 
 ## Performance Metrics
 
@@ -53,6 +53,7 @@ Progress: [███░░░░░░░] 33%
 
 *Updated after each plan completion*
 | Phase 01-interactive-wizard P01-01 | 165 | 2 tasks | 2 files |
+| Phase 01-interactive-wizard P01-02 | 420 | 2 tasks | 3 files |
 
 ## Accumulated Context
 
@@ -65,6 +66,9 @@ Recent decisions affecting current work:
 - Claude Code install via `claude mcp add` CLI (fixes `~/.claude/settings.json` bug)
 - Stay on `github:omilia/mcp`, do not publish to npm
 - Scope clients to Claude Code + Claude Desktop this milestone
+- askSecret mutes io.output.write during readline read — typed characters never echoed, label always shown (T-01-04)
+- runWizard prompts for realm in keycloak path with defaultValue "master" via askText — user can override without realm being required
+- createScriptedIo uses async generator Readable for lazy EOF — required for re-prompt loops in tests
 
 ### Pending Todos
 
@@ -84,6 +88,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-06-09T11:27:51.105Z
-Stopped at: Roadmap created — ready to plan Phase 1
+Last session: 2026-06-09T11:36:28.233Z
+Stopped at: Completed 01-02 wizard I/O layer (prompts.js + runWizard)
 Resume file: None
