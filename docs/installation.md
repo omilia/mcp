@@ -1,11 +1,29 @@
+<!--
+  MANUAL SYNC REQUIRED — CONFLUENCE DEVELOPER GUIDE OUT OF DATE
+
+  The internal "OCP MCP Server — Developer Guide" in Confluence still documents
+  the old npm package name, the flag-only `init --client ... --write` usage
+  (superseded by the interactive wizard), and an incorrect Claude Code config-file
+  path (the correct mechanism is `claude mcp add`, which writes no JSON file).
+
+  This guide (docs/installation.md) is the authoritative in-repo developer reference
+  and reflects current behavior. The Confluence guide must be updated manually to match:
+    - GitHub distribution spec (github:omilia/mcp)
+    - Interactive wizard (`npx github:omilia/mcp init` with no flags)
+    - Claude Code install via `claude mcp add` (no JSON config file written)
+
+  Syncing the Confluence guide is a manual, out-of-scope follow-up for a team member
+  with Confluence edit access. This tooling cannot and must not modify Confluence.
+-->
 # Installation
 
-The OCP MCP Server can be installed three ways. Pick the one that fits
+The OCP MCP Server can be installed four ways. Pick the one that fits
 your client and how often you upgrade.
 
 | Method | Best for | Friction | Updates |
 |---|---|---|---|
-| **`npx` CLI installer** | Developers who already have `npx` available; writes the client config for you | Single command | Re-run the CLI |
+| **Interactive wizard** (recommended) | First-time setup; any supported client; guided prompts, prereq checks, and smoke-test confirmation | Answer a few prompts | Re-run `npx github:omilia/mcp init` |
+| **`npx` CLI installer** | Developers who already have `npx` available; writes the client config for you | Single command with flags | Re-run the CLI |
 | **`.mcpb` bundle** | Claude Desktop users; non-technical users; environments without `npx` | Drag-and-drop install with a GUI prompt for secrets | Download the new bundle and reinstall |
 | **Manual MCP configuration** | Anyone comfortable editing JSON; works in all 5 supported clients | Lowest setup, no install step | Manual JSON edit per upgrade |
 
@@ -28,6 +46,71 @@ URL resolves to the default branch (`main`).
 
 ---
 
+## 0. Interactive wizard (recommended)
+
+Run with no flags to launch the guided wizard:
+
+```bash
+npx github:omilia/mcp init
+```
+
+The wizard walks you through every required field in order and will not
+write anything until you confirm:
+
+1. **Select a client** — choose `Claude Code` or `Claude Desktop`
+2. **Select auth method** — `Personal Access Token (PAT)` or
+   `Keycloak username/password`
+3. **Enter base URL** — your OCP environment's base URL
+4. **Enter credentials** — for PAT: your access token (input masked,
+   never echoed); for Keycloak: username, password, and realm (default:
+   `master`)
+5. **Review confirmation summary** — all fields are listed; secret values
+   are masked (only the last 4 characters visible) before anything is
+   written or run. No credentials appear in the summary output.
+
+After you confirm, the wizard:
+
+- Runs **prerequisite checks** — verifies that node 20+ and `uv` are
+  on `$PATH`; prints install hints for anything missing
+- **Installs the config** — for Claude Code this invokes `claude mcp add`
+  (no JSON file written); for Claude Desktop it writes the config file
+  with mode 0600
+- Runs a **smoke test** — starts the server and checks that the MCP tool
+  list is reachable
+- Prints a **PASS/FAIL verification summary** before exiting:
+
+  ```
+  Install verification:
+    [✓] node 20
+    [✓] uv
+    [✓] server smoke test — 31 tools reachable
+  Result: PASS
+  ```
+
+**Skip the smoke test** with `--no-verify-install` if you want to defer
+verification.
+
+**Non-interactive / CI mode:** supply all required flags on the command
+line and the wizard skips prompts entirely:
+
+```bash
+npx github:omilia/mcp init \
+  --client claude-code \
+  --auth pat \
+  --base-url "https://us1-m.ocp.ai" \
+  --access-token "$OCP_ACCESS_TOKEN"
+```
+
+> Security note: credentials are never echoed while you type, never
+> appear in the verification summary, and config files are written with
+> mode 0600. Never paste raw tokens into committed or shared files; use
+> the wizard's guided flow or supply them via environment variables.
+
+See [docs/installation.md](docs/installation.md) for the `npx` CLI
+flags, `.mcpb` bundle, and manual JSON configuration alternatives.
+
+---
+
 ## 1. `npx` CLI installer
 
 ```bash
@@ -39,6 +122,43 @@ Supported clients: `cursor`, `claude`, `claude-code`, `vscode`, `codex`.
 > Note: `--write` is not implemented for `codex`. The CLI will tell you
 > to re-run with `--print` and paste the TOML into `~/.codex/config.toml`
 > yourself. The other four clients accept `--write`.
+
+### Claude Code (`claude mcp add`)
+
+For the `claude-code` client, the installer does **not** write a JSON config file.
+Instead it invokes the official `claude mcp add` CLI, which registers the server
+where Claude Code actually reads MCP servers. The installer writes no JSON config
+file for Claude Code — `claude mcp add` is the authoritative registration path.
+
+**PAT authentication** — the installer runs:
+
+```
+claude mcp add OCP --scope user \
+  --env OCP_BASE_URL=your-ocp-base-url \
+  --env OCP_ACCESS_TOKEN=your-ocp-access-token \
+  -- npx -y github:omilia/mcp run
+```
+
+**Keycloak authentication** — the installer runs:
+
+```
+claude mcp add OCP --scope user \
+  --env OCP_BASE_URL=your-ocp-base-url \
+  --env OCP_USERNAME=your-ocp-username \
+  --env OCP_PASSWORD=your-ocp-password \
+  --env OCP_KEYCLOAK_REALM=master \
+  -- npx -y github:omilia/mcp run
+```
+
+The `OCP` server name and the `--env` key names are fixed constants from the
+installer (`DEFAULT_SERVER_NAME = "OCP"`). The token is passed as a single
+argument and is never shell-interpolated, so it does not appear in shell
+history. The wizard masks the token in its confirmation summary, and config files
+are written with mode 0600.
+
+**If `claude` is not on PATH:** the installer prints the masked `claude mcp add`
+command as a copy-paste snippet (exit 0 — it does not fail silently). Install the
+[Claude CLI](https://claude.ai/download) and re-run the command shown.
 
 Flags:
 
