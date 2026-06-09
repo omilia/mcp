@@ -40,6 +40,43 @@ Supported clients: `cursor`, `claude`, `claude-code`, `vscode`, `codex`.
 > to re-run with `--print` and paste the TOML into `~/.codex/config.toml`
 > yourself. The other four clients accept `--write`.
 
+### Claude Code (`claude mcp add`)
+
+For the `claude-code` client, the installer does **not** write a JSON config file.
+Instead it invokes the official `claude mcp add` CLI, which registers the server
+where Claude Code actually reads MCP servers. The installer writes no JSON config
+file for Claude Code — `claude mcp add` is the authoritative registration path.
+
+**PAT authentication** — the installer runs:
+
+```
+claude mcp add OCP --scope user \
+  --env OCP_BASE_URL=your-ocp-base-url \
+  --env OCP_ACCESS_TOKEN=your-ocp-access-token \
+  -- npx -y github:omilia/mcp run
+```
+
+**Keycloak authentication** — the installer runs:
+
+```
+claude mcp add OCP --scope user \
+  --env OCP_BASE_URL=your-ocp-base-url \
+  --env OCP_USERNAME=your-ocp-username \
+  --env OCP_PASSWORD=your-ocp-password \
+  --env OCP_KEYCLOAK_REALM=master \
+  -- npx -y github:omilia/mcp run
+```
+
+The `OCP` server name and the `--env` key names are fixed constants from the
+installer (`DEFAULT_SERVER_NAME = "OCP"`). The token is passed as a single
+argument and is never shell-interpolated, so it does not appear in shell
+history. The wizard masks the token in its confirmation summary, and config files
+are written with mode 0600.
+
+**If `claude` is not on PATH:** the installer prints the masked `claude mcp add`
+command as a copy-paste snippet (exit 0 — it does not fail silently). Install the
+[Claude CLI](https://claude.ai/download) and re-run the command shown.
+
 Flags:
 
 - `--write` — write to the default path for that client (not codex)
