@@ -10,7 +10,8 @@ import {
   mergeFlagsAndAnswers,
   missingPromptFields,
   needsPrompting,
-  requiredFieldsFor
+  requiredFieldsFor,
+  runWizard
 } from "../lib/wizard.js";
 import { askChoice, askSecret, askText } from "../lib/prompts.js";
 
@@ -476,4 +477,103 @@ test("askSecret acceptance criteria: label 'Access Token' present, secret 'topse
   assert.equal(result, "topsecret", "must resolve to the entered value");
   assert.ok(getOutput().includes("Access Token"), "output must contain the label");
   assert.ok(!getOutput().includes("topsecret"), "output must NOT contain the secret");
+});
+
+// ─── runWizard ────────────────────────────────────────────────────────────────
+
+test("runWizard: bare PAT path — collects client, auth, base-url, token", async () => {
+  // Scripted inputs: client=1 (claude-code), auth=1 (pat), base URL, access token
+  const { io, getOutput } = createScriptedIo([
+    "1",                           // client: 1 = claude-code
+    "1",                           // authChoice: 1 = pat
+    "https://ocp.example.com",     // baseUrl
+    "my-secret-token"              // accessToken
+  ]);
+  const result = await runWizard({}, io);
+  assert.equal(result.client, "claude-code");
+  assert.equal(result.authChoice, "pat");
+  assert.equal(result.baseUrl, "https://ocp.example.com");
+  assert.equal(result.accessToken, "my-secret-token");
+});
+
+test("runWizard: PAT path — accessToken not echoed in captured output", async () => {
+  const { io, getOutput } = createScriptedIo([
+    "1",
+    "1",
+    "https://ocp.example.com",
+    "my-secret-token"
+  ]);
+  await runWizard({}, io);
+  assert.ok(!getOutput().includes("my-secret-token"), "accessToken must NOT appear in captured output");
+});
+
+test("runWizard: keycloak path — collects username, password, realm uses default", async () => {
+  // client=1 (claude-code), auth=2 (keycloak), base URL, username, password, realm=""(default)
+  const { io } = createScriptedIo([
+    "1",                           // client: claude-code
+    "2",                           // authChoice: keycloak
+    "https://ocp.example.com",     // baseUrl
+    "alice",                       // username
+    "s3cret",                      // password
+    ""                             // realm: empty → default "master"
+  ]);
+  const result = await runWizard({}, io);
+  assert.equal(result.client, "claude-code");
+  assert.equal(result.authChoice, "keycloak");
+  assert.equal(result.baseUrl, "https://ocp.example.com");
+  assert.equal(result.username, "alice");
+  assert.equal(result.password, "s3cret");
+  // realm was not provided — should be default "master"
+  assert.equal(result.realm, "master");
+});
+
+test("runWizard: partially-flagged — only prompts for missing field (token)", async () => {
+  // Pre-supplied: client, authChoice, baseUrl — only accessToken missing
+  const { io, getOutput } = createScriptedIo([
+    "my-only-token"                // accessToken — the only missing field
+  ]);
+  const result = await runWizard(
+    { client: "claude-code", authChoice: "pat", baseUrl: "https://x.example.com" },
+    io
+  );
+  assert.equal(result.client, "claude-code");
+  assert.equal(result.authChoice, "pat");
+  assert.equal(result.baseUrl, "https://x.example.com");
+  assert.equal(result.accessToken, "my-only-token");
+  // The output should contain the token label but not the token value
+  assert.ok(getOutput().includes("Access token"), "token prompt label must appear");
+  // Should NOT contain the client/auth/baseUrl prompts since those were pre-supplied
+  assert.ok(!getOutput().includes("MCP client"), "client prompt must NOT appear (already supplied)");
+});
+
+test("runWizard: fully-flagged — prompts for nothing, returns options unchanged", async () => {
+  // All fields pre-supplied — wizard should return without prompting
+  const { io, getOutput } = createScriptedIo([]);
+  const options = {
+    client: "claude-code",
+    authChoice: "pat",
+    baseUrl: "https://x.example.com",
+    accessToken: "pre-token"
+  };
+  const result = await runWizard(options, io);
+  assert.equal(result.client, "claude-code");
+  assert.equal(result.accessToken, "pre-token");
+  // No output if nothing was prompted
+  assert.equal(getOutput(), "", "no output expected when all fields are pre-supplied");
+});
+
+test("runWizard: flag values win over wizard answers (WIZ-05)", async () => {
+  // Pre-supply baseUrl as a flag; wizard would prompt for client, auth, token
+  const { io } = createScriptedIo([
+    "1",                            // client: claude-code
+    "1",                            // auth: pat
+    "wizard-supplied-token"         // accessToken
+  ]);
+  const result = await runWizard(
+    { baseUrl: "https://flag-url.example.com" },
+    io
+  );
+  // Flag value must win
+  assert.equal(result.baseUrl, "https://flag-url.example.com");
+  assert.equal(result.accessToken, "wizard-supplied-token");
 });
