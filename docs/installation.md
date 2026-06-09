@@ -1,11 +1,12 @@
 # Installation
 
-The OCP MCP Server can be installed three ways. Pick the one that fits
+The OCP MCP Server can be installed four ways. Pick the one that fits
 your client and how often you upgrade.
 
 | Method | Best for | Friction | Updates |
 |---|---|---|---|
-| **`npx` CLI installer** | Developers who already have `npx` available; writes the client config for you | Single command | Re-run the CLI |
+| **Interactive wizard** (recommended) | First-time setup; any supported client; guided prompts, prereq checks, and smoke-test confirmation | Answer a few prompts | Re-run `npx github:omilia/mcp init` |
+| **`npx` CLI installer** | Developers who already have `npx` available; writes the client config for you | Single command with flags | Re-run the CLI |
 | **`.mcpb` bundle** | Claude Desktop users; non-technical users; environments without `npx` | Drag-and-drop install with a GUI prompt for secrets | Download the new bundle and reinstall |
 | **Manual MCP configuration** | Anyone comfortable editing JSON; works in all 5 supported clients | Lowest setup, no install step | Manual JSON edit per upgrade |
 
@@ -25,6 +26,71 @@ your client and how often you upgrade.
 The package is distributed directly from the public GitHub mirror —
 no npm registry account or login required. The bare `github:omilia/mcp`
 URL resolves to the default branch (`main`).
+
+---
+
+## 0. Interactive wizard (recommended)
+
+Run with no flags to launch the guided wizard:
+
+```bash
+npx github:omilia/mcp init
+```
+
+The wizard walks you through every required field in order and will not
+write anything until you confirm:
+
+1. **Select a client** — choose `Claude Code` or `Claude Desktop`
+2. **Select auth method** — `Personal Access Token (PAT)` or
+   `Keycloak username/password`
+3. **Enter base URL** — your OCP environment's base URL
+4. **Enter credentials** — for PAT: your access token (input masked,
+   never echoed); for Keycloak: username, password, and realm (default:
+   `master`)
+5. **Review confirmation summary** — all fields are listed; secret values
+   are masked (only the last 4 characters visible) before anything is
+   written or run. No credentials appear in the summary output.
+
+After you confirm, the wizard:
+
+- Runs **prerequisite checks** — verifies that node 20+ and `uv` are
+  on `$PATH`; prints install hints for anything missing
+- **Installs the config** — for Claude Code this invokes `claude mcp add`
+  (no JSON file written); for Claude Desktop it writes the config file
+  with mode 0600
+- Runs a **smoke test** — starts the server and checks that the MCP tool
+  list is reachable
+- Prints a **PASS/FAIL verification summary** before exiting:
+
+  ```
+  Install verification:
+    [✓] node 20
+    [✓] uv
+    [✓] server smoke test — 31 tools reachable
+  Result: PASS
+  ```
+
+**Skip the smoke test** with `--no-verify-install` if you want to defer
+verification.
+
+**Non-interactive / CI mode:** supply all required flags on the command
+line and the wizard skips prompts entirely:
+
+```bash
+npx github:omilia/mcp init \
+  --client claude-code \
+  --auth pat \
+  --base-url "https://us1-m.ocp.ai" \
+  --access-token "$OCP_ACCESS_TOKEN"
+```
+
+> Security note: credentials are never echoed while you type, never
+> appear in the verification summary, and config files are written with
+> mode 0600. Never paste raw tokens into committed or shared files; use
+> the wizard's guided flow or supply them via environment variables.
+
+See [docs/installation.md](docs/installation.md) for the `npx` CLI
+flags, `.mcpb` bundle, and manual JSON configuration alternatives.
 
 ---
 
