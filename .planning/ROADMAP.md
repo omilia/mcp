@@ -58,7 +58,7 @@ Decimal phases appear between their surrounding integers in numeric order.
   2. After config is written, a smoke test starts the server and confirms tools are reachable
   3. `init` exits with a clear PASS or FAIL summary; no credentials appear in any output line
 **Plans**: 3 plans
-- [ ] 03-01-PLAN.md — Prereq checks (lib/preflight.js): checkNode (>=20) + checkUv via injectable spawn, structured missing+hint result (VER-01)
+- [x] 03-01-PLAN.md — Prereq checks (lib/preflight.js): checkNode (>=20) + checkUv via injectable spawn, structured missing+hint result (VER-01)
 - [ ] 03-02-PLAN.md — Smoke test (lib/smoketest.js): spawn run command, MCP initialize + tools/list handshake over stdio, bounded timeout, child teardown, no env leak (VER-02/03)
 - [ ] 03-03-PLAN.md — Wire verification into finishInit + PASS/FAIL summary (lib/verify.js), --no-verify-install opt-out, --print skip, golden-SHA backward-compat (VER-01/02/03)
 

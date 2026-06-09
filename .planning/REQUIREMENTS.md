@@ -26,7 +26,7 @@ Requirements for this milestone. Each maps to a roadmap phase.
 
 ### Install Verification
 
-- [ ] **VER-01**: Before finishing, init checks that `node` (20+) and `uv` are on PATH and reports missing prerequisites with install hints
+- [x] **VER-01**: Before finishing, init checks that `node` (20+) and `uv` are on PATH and reports missing prerequisites with install hints
 - [ ] **VER-02**: After writing config, init runs a smoke test confirming the server starts and tools are reachable
 - [ ] **VER-03**: Verification reports a clear pass/fail summary and never prints credentials in its output
 
@@ -78,7 +78,7 @@ Deferred to a future milestone.
 | CLI-03 | Phase 2 | Complete |
 | CLI-04 | Phase 2 | Complete |
 | CLI-05 | Phase 2 | Complete |
-| VER-01 | Phase 3 | Pending |
+| VER-01 | Phase 3 | Complete |
 | VER-02 | Phase 3 | Pending |
 | VER-03 | Phase 3 | Pending |
 | DOC-01 | Phase 4 | Pending |
