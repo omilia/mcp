@@ -19,13 +19,22 @@ import { askChoice, askSecret, askText } from "../lib/prompts.js";
 /**
  * createScriptedIo(lines) — returns { io, getOutput }
  *
- * io.input is a Readable that emits the given lines (each suffixed with "\n").
+ * io.input is a Readable that emits each line lazily (one at a time via an
+ * async generator). This ensures readline does not see EOF until all lines
+ * have been consumed — required for re-prompt loops that call rl.question()
+ * multiple times on the same interface.
+ *
  * io.output is a Writable that captures all written bytes.
  * getOutput() returns the captured string.
  */
 function createScriptedIo(lines) {
-  const inputData = lines.map((l) => `${l}\n`).join("");
-  const input = Readable.from([inputData]);
+  // Yield each line lazily so readline doesn't see EOF until all are consumed.
+  async function* lineGen() {
+    for (const l of lines) {
+      yield `${l}\n`;
+    }
+  }
+  const input = Readable.from(lineGen());
 
   let captured = "";
   const output = new Writable({
