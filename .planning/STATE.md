@@ -2,16 +2,16 @@
 gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
-status: verifying
+status: executing
 stopped_at: Completed 01-02 wizard I/O layer (prompts.js + runWizard)
-last_updated: "2026-06-09T11:51:03.870Z"
+last_updated: "2026-06-09T12:17:39.781Z"
 last_activity: 2026-06-09
 progress:
   total_phases: 4
   completed_phases: 1
-  total_plans: 3
-  completed_plans: 3
-  percent: 100
+  total_plans: 6
+  completed_plans: 4
+  percent: 67
 ---
 
 # Project State
@@ -21,16 +21,16 @@ progress:
 See: .planning/PROJECT.md (updated 2026-06-09)
 
 **Core value:** A developer can run `npx github:omilia/mcp init` with no flags, answer a few prompts, and end up with a working OCP MCP server in their client — Claude Code above all — confirmed working before the command exits.
-**Current focus:** Phase 01 — interactive-wizard
+**Current focus:** Phase 02 — client-install-paths
 
 ## Current Position
 
-Phase: 01 (interactive-wizard) — EXECUTING
-Plan: 3 of 3
-Status: Phase complete — ready for verification
+Phase: 02 (client-install-paths) — EXECUTING
+Plan: 2 of 3
+Status: Ready to execute
 Last activity: 2026-06-09
 
-Progress: [██████████] 100%
+Progress: [███████░░░] 67%
 
 ## Performance Metrics
 
@@ -55,6 +55,7 @@ Progress: [██████████] 100%
 | Phase 01-interactive-wizard P01-01 | 165 | 2 tasks | 2 files |
 | Phase 01-interactive-wizard P01-02 | 420 | 2 tasks | 3 files |
 | Phase 01-interactive-wizard P03 | 1080 | 2 tasks | 3 files |
+| Phase 02-client-install-paths P01 | 5 | 2 tasks | 1 files |
 
 ## Accumulated Context
 
@@ -73,6 +74,7 @@ Recent decisions affecting current work:
 - [Phase ?]: finishInit() extracted as synchronous helper
 - [Phase ?]: wizard TTY guard requires io.input !== undefined for legacy caller backward compat
 - [Phase ?]: wizardIo = { input: io.input, output: io.stdout } bridges runCli io shape to wizard io shape
+- [Phase ?]: PAT_INIT_GOLDEN_SHA256 derived from actual runCli output, not hand-copied from plan docs
 
 ### Pending Todos
 
@@ -92,6 +94,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-06-09T11:50:13.236Z
+Last session: 2026-06-09T12:17:33.004Z
 Stopped at: Completed 01-02 wizard I/O layer (prompts.js + runWizard)
 Resume file: None

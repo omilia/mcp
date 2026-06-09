@@ -22,7 +22,7 @@ Requirements for this milestone. Each maps to a roadmap phase.
 - [ ] **CLI-02**: The broken `~/.claude/settings.json` write path for claude-code is removed/replaced so config lands where Claude Code actually reads MCP servers
 - [ ] **CLI-03**: When the `claude` CLI is not on PATH, the tool degrades gracefully with actionable guidance (printable config + instructions)
 - [ ] **CLI-04**: Claude Desktop install path is verified end-to-end (config write to the correct location and/or `.mcpb` bundle install)
-- [ ] **CLI-05**: Generated/written config uses the GitHub distribution spec (`npx -y github:omilia/mcp run`), consistently across clients
+- [x] **CLI-05**: Generated/written config uses the GitHub distribution spec (`npx -y github:omilia/mcp run`), consistently across clients
 
 ### Install Verification
 
@@ -77,7 +77,7 @@ Deferred to a future milestone.
 | CLI-02 | Phase 2 | Pending |
 | CLI-03 | Phase 2 | Pending |
 | CLI-04 | Phase 2 | Pending |
-| CLI-05 | Phase 2 | Pending |
+| CLI-05 | Phase 2 | Complete |
 | VER-01 | Phase 3 | Pending |
 | VER-02 | Phase 3 | Pending |
 | VER-03 | Phase 3 | Pending |
