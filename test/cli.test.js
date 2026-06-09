@@ -15,7 +15,7 @@ import { buildRunCommand } from "../lib/runtime.js";
 // deliberate API change — it is the contract that PAT-only users see
 // byte-identical output across releases. Update this constant only
 // alongside an intentional change to the PAT-default emission.
-const PAT_INIT_GOLDEN_SHA256 = "556844bc833b7eab9c565c70d990961c2357ec11da138b1f0ca9842b9a59284c";
+const PAT_INIT_GOLDEN_SHA256 = "9f03b6648fc1e5573acf9bc3fc5bc0c7f56ee3f839fe5bb8acf5d4d498103647";
 
 function createIo() {
   const output = {
@@ -45,7 +45,7 @@ test("builds Cursor config with inline literal placeholders by default", () => {
     mcpServers: {
       OCP: {
         command: "npx",
-        args: ["-y", "@omilia/mcp-server", "run"],
+        args: ["-y", "github:omilia/mcp", "run"],
         env: {
           OCP_BASE_URL: "your-ocp-base-url",
           OCP_ACCESS_TOKEN: "your-ocp-access-token"
