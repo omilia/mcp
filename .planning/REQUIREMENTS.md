@@ -12,9 +12,9 @@ Requirements for this milestone. Each maps to a roadmap phase.
 - [ ] **WIZ-01**: Running `init` with no arguments launches an interactive prompt flow instead of erroring
 - [ ] **WIZ-02**: Wizard prompts the user to select a client (Claude Code, Claude Desktop)
 - [ ] **WIZ-03**: Wizard prompts for auth method (PAT or Keycloak) and collects the matching credentials (base URL + token, or base URL + username/password/realm)
-- [ ] **WIZ-04**: Wizard shows a confirmation summary of what will be written/run before making any change, with secrets masked
-- [ ] **WIZ-05**: Any value supplied via an existing flag (`--client`, `--auth`, `--base-url`, `--access-token`, etc.) is used as-is and not re-prompted; fully-flagged invocations run non-interactively (CI-safe)
-- [ ] **WIZ-06**: Wizard exits cleanly with a clear message when run in a non-interactive/no-TTY environment without sufficient flags
+- [x] **WIZ-04**: Wizard shows a confirmation summary of what will be written/run before making any change, with secrets masked
+- [x] **WIZ-05**: Any value supplied via an existing flag (`--client`, `--auth`, `--base-url`, `--access-token`, etc.) is used as-is and not re-prompted; fully-flagged invocations run non-interactively (CI-safe)
+- [x] **WIZ-06**: Wizard exits cleanly with a clear message when run in a non-interactive/no-TTY environment without sufficient flags
 
 ### Client Install
 
@@ -70,9 +70,9 @@ Deferred to a future milestone.
 | WIZ-01 | Phase 1 | Pending |
 | WIZ-02 | Phase 1 | Pending |
 | WIZ-03 | Phase 1 | Pending |
-| WIZ-04 | Phase 1 | Pending |
-| WIZ-05 | Phase 1 | Pending |
-| WIZ-06 | Phase 1 | Pending |
+| WIZ-04 | Phase 1 | Complete |
+| WIZ-05 | Phase 1 | Complete |
+| WIZ-06 | Phase 1 | Complete |
 | CLI-01 | Phase 2 | Pending |
 | CLI-02 | Phase 2 | Pending |
 | CLI-03 | Phase 2 | Pending |
