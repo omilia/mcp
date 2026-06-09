@@ -197,19 +197,37 @@ test("refuses to overwrite existing server config without force", () => {
   assert.match(io.output.stderr, /Re-run with --force/);
 });
 
-test("clientConfigPath resolves claude-code to ~/.claude/settings.json", () => {
+test("clientConfigPath returns undefined for claude-code (CLI-02: no settings.json write path)", () => {
+  // CLI-02: claude-code is installed via `claude mcp add`, not JSON config file.
   const result = clientConfigPath("claude-code", { HOME: "/home/user" });
-  assert.equal(result, "/home/user/.claude/settings.json");
+  assert.equal(result, undefined);
 });
 
-test("writes claude-code config to an explicit path", () => {
+test("init --client claude-code invokes claude mcp add with correct argv (CLI-01)", () => {
+  const recorded = [];
   const io = createIo();
-  const directory = mkdtempSync(join(tmpdir(), "ocp-mcp-"));
-  const outputPath = join(directory, "settings.json");
-  const exitCode = runCli(["init", "--client", "claude-code", "--write", "--path", outputPath], io);
+  // Attach fake spawn directly on io (CANONICAL SPAWN CONTRACT — NOT via createScriptedIo).
+  io.spawn = (cmd, args) => { recorded.push({ cmd, args }); return { status: 0 }; };
+
+  const exitCode = runCli([
+    "init", "--client", "claude-code",
+    "--base-url", "https://ocp.example.com",
+    "--access-token", "pat-cc-1234"
+  ], io);
 
   assert.equal(exitCode, 0);
-  assert.deepEqual(JSON.parse(readFileSync(outputPath, "utf8")), buildClientConfig("claude-code"));
+  // The version-check spawn + the mcp add spawn are both recorded
+  const mcpCall = recorded.find((r) => r.args && r.args[0] === "mcp");
+  assert.ok(mcpCall, "must have recorded the claude mcp add spawn");
+  assert.equal(mcpCall.cmd, "claude");
+  assert.deepEqual(mcpCall.args, [
+    "mcp", "add", "OCP", "--scope", "user",
+    "--env", "OCP_BASE_URL=https://ocp.example.com",
+    "--env", "OCP_ACCESS_TOKEN=pat-cc-1234",
+    "--", "npx", "-y", "github:omilia/mcp", "run"
+  ]);
+  // No file written, no settings.json reference
+  assert.equal(io.output.stdout.includes("settings.json"), false);
 });
 
 test("PAT init for claude produces byte-identical output to golden SHA", () => {
@@ -388,7 +406,10 @@ test("no-TTY bare init returns 1 and stderr names --client (WIZ-06)", async () =
 test("interactive bare init reaches masked confirmation summary (WIZ-01, WIZ-04)", async () => {
   // parseInitOptions defaults authChoice to "pat", so the wizard only prompts for:
   // client, baseUrl, accessToken (3 fields). Auth choice is already resolved.
-  const { io, output } = createScriptedIo(["1", "https://ocp.example.com", "super-secret-token-1234"]);
+  // Script "2" (claude / Claude Desktop) — a JSON_MCP_CLIENTS member — so finishInit
+  // emits the confirmation summary + config JSON without routing to the real spawnSync.
+  // (createScriptedIo has no io.spawn; "1" = claude-code would hit the real claude CLI.)
+  const { io, output } = createScriptedIo(["2", "https://ocp.example.com", "super-secret-token-1234"]);
   const result = await Promise.resolve(runCli(["init"], io));
 
   assert.equal(result, 0);
@@ -408,9 +429,11 @@ test("interactive bare init reaches masked confirmation summary (WIZ-01, WIZ-04)
 });
 
 test("fully-flagged --print returns config JSON only, no prompts (WIZ-05)", async () => {
+  // Use cursor (a JSON client) so the --print path emits config JSON.
+  // (claude-code --print emits a masked `claude mcp add` snippet, not JSON.)
   const io = createIo();
   const result = await Promise.resolve(runCli([
-    "init", "--client", "claude-code",
+    "init", "--client", "cursor",
     "--auth", "pat",
     "--base-url", "https://ocp.example.com",
     "--access-token", "pat-test-token",
@@ -427,12 +450,41 @@ test("fully-flagged --print returns config JSON only, no prompts (WIZ-05)", asyn
   assert.equal(io.output.stdout.includes("MCP client"), false);
 });
 
+test("claude-code --print emits the masked mcp add command, no spawn (CLI-01)", async () => {
+  const recorded = [];
+  const io = createIo();
+  // Attach fake spawn directly on io (CANONICAL SPAWN CONTRACT — NOT via createScriptedIo).
+  io.spawn = (cmd, args) => { recorded.push({ cmd, args }); return { status: 0 }; };
+
+  const result = await Promise.resolve(runCli([
+    "init", "--client", "claude-code",
+    "--auth", "pat",
+    "--base-url", "https://ocp.example.com",
+    "--access-token", "pat-print-9999",
+    "--print"
+  ], io));
+
+  assert.equal(result, 0);
+  // print mode must NOT spawn any process
+  assert.equal(recorded.length, 0, "print mode must not invoke spawn at all");
+  // stdout must reference mcp add
+  assert.ok(io.output.stdout.includes("mcp add"), "stdout must include 'mcp add'");
+  // raw token must NOT appear
+  assert.ok(!io.output.stdout.includes("pat-print-9999"),
+    "raw token must not appear in print mode stdout");
+  // masked tail must appear (last 4 chars of "pat-print-9999" = "9999")
+  assert.ok(io.output.stdout.includes("9999"),
+    "masked tail '9999' must appear in print mode stdout");
+});
+
 test("wizard + --write: confirmation summary emitted before file write (WIZ-04 ordering)", async () => {
   const directory = mkdtempSync(join(tmpdir(), "ocp-mcp-wiz-"));
   const outputPath = join(directory, "config.json");
 
   // parseInitOptions defaults authChoice to "pat"; wizard prompts for: client, baseUrl, accessToken.
-  const { io, output } = createScriptedIo(["1", "https://ocp.example.com", "wiz-write-token-9999"]);
+  // Script "2" (claude / Claude Desktop) — a JSON client — so the file-write assertions remain valid.
+  // ("1" = claude-code routes through installClaudeCode and does not write JSON config files.)
+  const { io, output } = createScriptedIo(["2", "https://ocp.example.com", "wiz-write-token-9999"]);
   const result = await Promise.resolve(runCli(["init", "--write", "--path", outputPath], io));
 
   assert.equal(result, 0);
@@ -450,9 +502,11 @@ test("wizard + --write: confirmation summary emitted before file write (WIZ-04 o
 test("wizard skips pre-supplied flag fields, prompts only for missing ones (WIZ-05 partial)", async () => {
   // Provide --client and --base-url; only --access-token is missing.
   // parseInitOptions defaults authChoice to "pat"; missingPromptFields only returns ["accessToken"].
+  // Use --client claude (a JSON client) so finishInit emits the confirmation summary + config JSON.
+  // (claude-code would route through installClaudeCode and not emit the JSON/summary the test asserts.)
   const { io, output } = createScriptedIo(["partial-access-token-5678"]);
   const result = await Promise.resolve(runCli([
-    "init", "--client", "claude-code", "--base-url", "https://ocp.example.com"
+    "init", "--client", "claude", "--base-url", "https://ocp.example.com"
   ], io));
 
   assert.equal(result, 0);
