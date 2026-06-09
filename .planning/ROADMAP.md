@@ -60,7 +60,7 @@ Decimal phases appear between their surrounding integers in numeric order.
 **Plans**: 3 plans
 - [x] 03-01-PLAN.md — Prereq checks (lib/preflight.js): checkNode (>=20) + checkUv via injectable spawn, structured missing+hint result (VER-01)
 - [x] 03-02-PLAN.md — Smoke test (lib/smoketest.js): spawn run command, MCP initialize + tools/list handshake over stdio, bounded timeout, child teardown, no env leak (VER-02/03)
-- [ ] 03-03-PLAN.md — Wire verification into finishInit + PASS/FAIL summary (lib/verify.js), --no-verify-install opt-out, --print skip, golden-SHA backward-compat (VER-01/02/03)
+- [x] 03-03-PLAN.md — Wire verification into finishInit + PASS/FAIL summary (lib/verify.js), --no-verify-install opt-out, --print skip, golden-SHA backward-compat (VER-01/02/03)
 
 ### Phase 4: Docs & Tests
 **Goal**: Developer guide reflects actual behavior; `test/cli.test.js` covers wizard, install paths, config writing, and CI-mode invocations
