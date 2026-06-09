@@ -1,3 +1,21 @@
+<!--
+  MANUAL SYNC REQUIRED — CONFLUENCE DEVELOPER GUIDE OUT OF DATE
+
+  The internal "OCP MCP Server — Developer Guide" in Confluence still documents:
+    - The old @omilia/mcp-server npm package name (superseded by github:omilia/mcp)
+    - The flag-only `init --client ... --write` usage (superseded by the interactive wizard)
+    - A Claude Code config write to ~/.claude/settings.json (not how Claude Code
+      registers MCP servers; the correct path is `claude mcp add`)
+
+  This guide (docs/installation.md) is the authoritative in-repo developer reference
+  and reflects current behavior. The Confluence guide must be updated manually to match:
+    - GitHub distribution spec (github:omilia/mcp)
+    - Interactive wizard (`npx github:omilia/mcp init` with no flags)
+    - Claude Code install via `claude mcp add` (no JSON file written)
+
+  Syncing the Confluence guide is a manual, out-of-scope follow-up for a team member
+  with Confluence edit access. This tooling cannot and must not modify Confluence.
+-->
 # Installation
 
 The OCP MCP Server can be installed four ways. Pick the one that fits
