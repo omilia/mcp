@@ -2,16 +2,16 @@
 gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
-status: verifying
+status: executing
 stopped_at: Completed 02-02 claude-code install via claude mcp add CLI
-last_updated: "2026-06-09T12:58:02.509Z"
+last_updated: "2026-06-09T13:20:23.839Z"
 last_activity: 2026-06-09
 progress:
   total_phases: 4
   completed_phases: 3
-  total_plans: 9
-  completed_plans: 9
-  percent: 100
+  total_plans: 11
+  completed_plans: 10
+  percent: 91
 ---
 
 # Project State
@@ -21,16 +21,16 @@ progress:
 See: .planning/PROJECT.md (updated 2026-06-09)
 
 **Core value:** A developer can run `npx github:omilia/mcp init` with no flags, answer a few prompts, and end up with a working OCP MCP server in their client — Claude Code above all — confirmed working before the command exits.
-**Current focus:** Phase 03 — install-verification
+**Current focus:** Phase 04 — docs-and-tests
 
 ## Current Position
 
-Phase: 03 (install-verification) — EXECUTING
-Plan: 3 of 3
-Status: Phase complete — ready for verification
+Phase: 04 (docs-and-tests) — EXECUTING
+Plan: 2 of 2
+Status: Ready to execute
 Last activity: 2026-06-09
 
-Progress: [██████████] 100%
+Progress: [█████████░] 91%
 
 ## Performance Metrics
 
@@ -61,6 +61,7 @@ Progress: [██████████] 100%
 | Phase 03-install-verification P03-01 | 6 | 2 tasks | 2 files |
 | Phase 03-install-verification P03-02 | 10 | 2 tasks | 2 files |
 | Phase 03-install-verification P03-03 | 18 | 2 tasks | 4 files |
+| Phase 04-docs-and-tests P04-01 | 8 | 3 tasks | 2 files |
 
 ## Accumulated Context
 
@@ -86,6 +87,7 @@ Recent decisions affecting current work:
 - [Phase ?]: Claude Desktop write-path end-to-end verification
 - [Phase ?]: smokeTest settled guard ensures child.kill() fires exactly once across success/empty/timeout/spawn-error
 - [Phase ?]: VER-03 enforced in smokeTest: result object restricted to ok/toolCount/hasReadGuide/reason — env and raw child output never included
+- [Phase ?]: docs/installation.md structure
 
 ### Pending Todos
 
@@ -105,6 +107,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-06-09T12:58:02.502Z
+Last session: 2026-06-09T13:20:10.772Z
 Stopped at: Completed 02-02 claude-code install via claude mcp add CLI
 Resume file: None

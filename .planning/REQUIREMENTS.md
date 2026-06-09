@@ -32,9 +32,9 @@ Requirements for this milestone. Each maps to a roadmap phase.
 
 ### Documentation
 
-- [ ] **DOC-01**: Developer guide reconciled to use the GitHub URL (`github:omilia/mcp`), not `@omilia/mcp-server`
-- [ ] **DOC-02**: Developer guide documents the correct Claude Code install path (`claude mcp add` / `~/.claude.json`)
-- [ ] **DOC-03**: Developer guide documents the new interactive wizard flow
+- [x] **DOC-01**: Developer guide reconciled to use the GitHub URL (`github:omilia/mcp`), not `@omilia/mcp-server`
+- [x] **DOC-02**: Developer guide documents the correct Claude Code install path (`claude mcp add` / `~/.claude.json`)
+- [x] **DOC-03**: Developer guide documents the new interactive wizard flow
 
 ### Tests
 
@@ -81,9 +81,9 @@ Deferred to a future milestone.
 | VER-01 | Phase 3 | Complete |
 | VER-02 | Phase 3 | Complete |
 | VER-03 | Phase 3 | Complete |
-| DOC-01 | Phase 4 | Pending |
-| DOC-02 | Phase 4 | Pending |
-| DOC-03 | Phase 4 | Pending |
+| DOC-01 | Phase 4 | Complete |
+| DOC-02 | Phase 4 | Complete |
+| DOC-03 | Phase 4 | Complete |
 | TST-01 | Phase 4 | Pending |
 | TST-02 | Phase 4 | Pending |
 | TST-03 | Phase 4 | Pending |
