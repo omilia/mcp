@@ -29,7 +29,10 @@ Decimal phases appear between their surrounding integers in numeric order.
   3. A confirmation summary is shown before any file or process change is made, with secrets masked
   4. Running with all flags (e.g., `--client claude-code --auth pat --base-url ... --access-token ...`) runs non-interactively with no prompts
   5. Running with no TTY and insufficient flags exits with a clear, actionable message rather than crashing
-**Plans**: TBD
+**Plans**: 3 plans
+- [ ] 01-01-PLAN.md — Pure wizard-decision layer (lib/wizard.js): needsPrompting, flag/answer merge, secret masking, confirmation summary, no-TTY error
+- [ ] 01-02-PLAN.md — Interactive I/O layer (lib/prompts.js, non-echoing askSecret) + async runWizard orchestrator (client/auth/credentials)
+- [ ] 01-03-PLAN.md — Wire wizard into runInit + async bin entry; integration tests (launch, no-TTY guard, non-interactive, masking, golden-SHA preserved)
 
 ### Phase 2: Client Install Paths
 **Goal**: Claude Code installs via `claude mcp add` to the correct location; Claude Desktop installs end-to-end; all emitted config uses the GitHub distribution spec
@@ -71,7 +74,7 @@ Phases execute in numeric order: 1 → 2 → 3 → 4
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
-| 1. Interactive Wizard | 0/? | Not started | - |
+| 1. Interactive Wizard | 0/3 | Planned | - |
 | 2. Client Install Paths | 0/? | Not started | - |
 | 3. Install Verification | 0/? | Not started | - |
 | 4. Docs & Tests | 0/? | Not started | - |
