@@ -628,3 +628,66 @@ test("wizard skips pre-supplied flag fields, prompts only for missing ones (WIZ-
   const summaryPortion = summaryEnd >= 0 ? output.stdout.slice(0, summaryEnd) : output.stdout;
   assert.equal(summaryPortion.includes("partial-access-token-5678"), false);
 });
+
+// ─── Production-shape regression (process exposes stdin, NOT input) ───────────
+// bin/ocp-mcp.js passes the real `process` to runCli. `process` has
+// stdin/stdout/stderr — there is no `process.input`. The original runInit read
+// `io.input`, so in production it was always undefined, the wizard never ran,
+// and bare `init` errored with "Unsupported client: undefined". All prior tests
+// injected `io.input`, masking the bug. This helper mirrors the REAL shape.
+function createProcessShapedIo(answers, { isTty = true } = {}) {
+  const outputCapture = { stderr: "", stdout: "" };
+  const lines = answers.slice();
+  const stdin = Readable.from(
+    (async function* () {
+      for (const line of lines) {
+        yield line + "\n";
+      }
+    })()
+  );
+  stdin.isTTY = isTty; // real terminals set this; no setRawMode → askSecret uses muted readline
+  return {
+    io: {
+      stdin,
+      stderr: { write(value) { outputCapture.stderr += value; } },
+      stdout: { write(value) { outputCapture.stdout += value; } }
+    },
+    output: outputCapture
+  };
+}
+
+test("bare init triggers the wizard via process-shaped io (stdin, not input) (production-TTY regression)", async () => {
+  // client "claude" (Desktop): default (no --write) prints the config — no file write, no spawn.
+  // authChoice defaults to "pat", so the wizard prompts only: client, baseUrl, accessToken.
+  // Pass choice VALUES (not indices) so the test is order-independent.
+  const { io, output } = createProcessShapedIo([
+    "claude",
+    "https://ocp.example.com",
+    "prod-shape-token-1234"
+  ]);
+
+  const code = await Promise.resolve(runCli(["init"], io));
+
+  assert.equal(code, 0, "wizard path should complete with exit 0");
+  // The wizard actually ran: client choices were presented.
+  assert.match(output.stdout, /Claude Desktop|claude-code/, "wizard should have prompted for client");
+  // It must NOT have fallen through to the unsupported-client error.
+  assert.doesNotMatch(output.stderr, /Unsupported client/, "must not hit unsupported-client fallthrough");
+  assert.doesNotMatch(output.stdout, /Unsupported client/);
+});
+
+test("--print with --client emits placeholders on process-shaped io and never prompts (manual-config regression)", async () => {
+  // The documented "Manual config" method: `init --client <name> --print` must emit a
+  // fill-in-the-blanks config snippet WITHOUT prompting or requiring base-url/token —
+  // even on a real process-shaped io where io.stdin exists. (Regression: the io.stdin
+  // fallback once made the no-TTY guard fire here and error instead of printing.)
+  const { io, output } = createProcessShapedIo([], { isTty: false });
+
+  const code = await Promise.resolve(runCli(["init", "--client", "cursor", "--print"], io));
+
+  assert.equal(code, 0, "--print should emit placeholders and exit 0");
+  assert.doesNotMatch(output.stderr, /missing required options|Unsupported client/i, "must not error");
+  const cfg = JSON.parse(output.stdout);
+  assert.equal(cfg.mcpServers.OCP.env.OCP_BASE_URL, "your-ocp-base-url", "emits base-url placeholder");
+  assert.equal(cfg.mcpServers.OCP.env.OCP_ACCESS_TOKEN, "your-ocp-access-token", "emits token placeholder");
+});
