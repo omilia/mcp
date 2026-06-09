@@ -19,13 +19,26 @@ Claude Desktop, Claude Code, Cursor, VS Code (with Copilot), and Codex.
 
 ## Install
 
+**Recommended — interactive wizard (answers a few prompts, then confirms before writing anything):**
+
+```bash
+npx github:omilia/mcp init
+```
+
+The wizard selects your client, collects credentials with masked input,
+runs prereq checks (Node 20+, `uv`), installs the config, and prints a
+PASS/FAIL smoke-test summary before exiting. See the
+[Interactive wizard section](docs/installation.md#0-interactive-wizard-recommended)
+in the installation guide for the full prompt sequence.
+
+**Non-interactive / CI — supply all flags to skip prompts:**
+
 ```bash
 npx github:omilia/mcp init --client <claude|claude-code|cursor|vscode|codex>
 ```
 
-This writes the right config block for your client. See the full
-installation guide at [docs/installation.md](docs/installation.md) for the
-`.mcpb` one-click bundle (Claude Desktop) and manual configuration
+See the full installation guide at [docs/installation.md](docs/installation.md)
+for the `.mcpb` one-click bundle (Claude Desktop) and manual configuration
 alternatives.
 
 ## Authentication
