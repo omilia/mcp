@@ -1,13 +1,14 @@
 import assert from "node:assert/strict";
 import crypto from "node:crypto";
-import { existsSync, mkdtempSync, readFileSync } from "node:fs";
+import { existsSync, mkdtempSync, readFileSync, statSync } from "node:fs";
 import { tmpdir } from "node:os";
-import { join } from "node:path";
+import { dirname, join, resolve } from "node:path";
+import { fileURLToPath } from "node:url";
 import { Readable } from "node:stream";
 import test from "node:test";
 
 import { runCli } from "../lib/cli.js";
-import { buildClientConfig, buildCursorConfig, clientConfigPath } from "../lib/config.js";
+import { buildClientConfig, buildCursorConfig, clientConfigPath, getEnvBlock, JSON_MCP_CLIENTS } from "../lib/config.js";
 import { buildRunCommand } from "../lib/runtime.js";
 
 // Regression gate: SHA-256 of `init --client claude --print` output
@@ -497,6 +498,100 @@ test("wizard + --write: confirmation summary emitted before file write (WIZ-04 o
   assert.ok(fileContent.mcpServers ?? fileContent.servers);
   // Raw token must NOT appear in stdout (write path sends token to file, not stdout)
   assert.equal(output.stdout.includes("wiz-write-token-9999"), false);
+});
+
+// ─── CLI-04 / CLI-05: Claude Desktop write-path tests ────────────────────────
+
+test("claude remains a JSON client after Plan 02 (CLI-04 invariant)", () => {
+  // CLI-05: ASSERT — do NOT silently restore. If this fails, 02-02 removed it incorrectly.
+  assert.ok(
+    JSON_MCP_CLIENTS.has("claude"),
+    "claude must stay in JSON_MCP_CLIENTS; 02-02 removed it incorrectly — fix 02-02, do not patch here"
+  );
+});
+
+test("clientConfigPath('claude') resolves to macOS claude_desktop_config.json path (CLI-04 location)", () => {
+  const result = clientConfigPath("claude", { HOME: "/home/user" });
+  assert.equal(
+    result,
+    "/home/user/Library/Application Support/Claude/claude_desktop_config.json"
+  );
+});
+
+test("init --client claude --write writes valid mcpServers JSON with npx github:omilia/mcp run (CLI-04, CLI-05)", () => {
+  const io = createIo();
+  const directory = mkdtempSync(join(tmpdir(), "ocp-mcp-claude-"));
+  const outputPath = join(directory, "claude_desktop_config.json");
+
+  const exitCode = runCli([
+    "init", "--client", "claude", "--write",
+    "--path", outputPath,
+    "--base-url", "https://ocp.example.com",
+    "--access-token", "pat-desktop-1234"
+  ], io);
+
+  assert.equal(exitCode, 0);
+
+  // File must exist and be readable
+  const content = readFileSync(outputPath, "utf8");
+  const parsed = JSON.parse(content);
+
+  // mcpServers block must be present with the OCP key
+  assert.ok(parsed.mcpServers, "written file must have mcpServers");
+  assert.ok(parsed.mcpServers.OCP, "mcpServers must contain OCP");
+
+  // CLI-05: command and args must use npx -y github:omilia/mcp run
+  assert.equal(parsed.mcpServers.OCP.command, "npx");
+  assert.deepEqual(parsed.mcpServers.OCP.args, ["-y", "github:omilia/mcp", "run"]);
+
+  // env must carry the supplied base URL and token
+  assert.equal(parsed.mcpServers.OCP.env.OCP_BASE_URL, "https://ocp.example.com");
+  assert.equal(parsed.mcpServers.OCP.env.OCP_ACCESS_TOKEN, "pat-desktop-1234");
+
+  // T-02-07: file mode must be 0o600
+  const stat = statSync(outputPath);
+  // On non-Windows platforms, verify mode bits; process.platform guard for CI portability
+  if (process.platform !== "win32") {
+    assert.equal(
+      (stat.mode & 0o777).toString(8),
+      "600",
+      "claude_desktop_config.json must be written with mode 0o600"
+    );
+  }
+});
+
+// ─── CLI-04: .mcpb bundle manifest consistency test ───────────────────────────
+
+test(".mcpb manifest.json env keys deep-equal PAT getEnvBlock keys and args end with 'run' (CLI-04 T-02-08)", () => {
+  // Resolve manifest.json relative to this test file (repo root)
+  const __filename = fileURLToPath(import.meta.url);
+  const __dirname = dirname(__filename);
+  const manifestPath = resolve(__dirname, "../manifest.json");
+  const manifest = JSON.parse(readFileSync(manifestPath, "utf8"));
+
+  const mcpConfig = manifest.server.mcp_config;
+
+  // Args must end with "run"
+  assert.equal(
+    mcpConfig.args.at(-1),
+    "run",
+    "manifest mcp_config.args last element must be 'run'"
+  );
+
+  // Args must reference bin/ocp-mcp.js (bundle entry point)
+  assert.ok(
+    mcpConfig.args.some((a) => a.includes("bin/ocp-mcp.js")),
+    "manifest mcp_config.args must contain the bin/ocp-mcp.js path"
+  );
+
+  // Env keys must deep-equal the PAT getEnvBlock keys (T-02-08 — locks env contract)
+  const patEnvKeys = Object.keys(getEnvBlock("pat", { useEnvVars: true }));
+  const manifestEnvKeys = Object.keys(mcpConfig.env);
+  assert.deepEqual(
+    manifestEnvKeys.sort(),
+    patEnvKeys.sort(),
+    "manifest mcp_config.env keys must exactly match the PAT getEnvBlock keys"
+  );
 });
 
 test("wizard skips pre-supplied flag fields, prompts only for missing ones (WIZ-05 partial)", async () => {
