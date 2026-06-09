@@ -4,14 +4,14 @@ milestone: v1.0
 milestone_name: milestone
 status: executing
 stopped_at: Completed 02-02 claude-code install via claude mcp add CLI
-last_updated: "2026-06-09T12:45:34.551Z"
+last_updated: "2026-06-09T12:50:26.577Z"
 last_activity: 2026-06-09
 progress:
   total_phases: 4
   completed_phases: 2
   total_plans: 9
-  completed_plans: 7
-  percent: 78
+  completed_plans: 8
+  percent: 89
 ---
 
 # Project State
@@ -26,11 +26,11 @@ See: .planning/PROJECT.md (updated 2026-06-09)
 ## Current Position
 
 Phase: 03 (install-verification) — EXECUTING
-Plan: 2 of 3
+Plan: 3 of 3
 Status: Ready to execute
 Last activity: 2026-06-09
 
-Progress: [████████░░] 78%
+Progress: [█████████░] 89%
 
 ## Performance Metrics
 
@@ -59,6 +59,7 @@ Progress: [████████░░] 78%
 | Phase 02-client-install-paths P02-02 | 15 | 3 tasks | 5 files |
 | Phase 02-client-install-paths P02-03 | 5 | 2 tasks | 1 files |
 | Phase 03-install-verification P03-01 | 6 | 2 tasks | 2 files |
+| Phase 03-install-verification P03-02 | 10 | 2 tasks | 2 files |
 
 ## Accumulated Context
 
@@ -82,6 +83,8 @@ Recent decisions affecting current work:
 - [Phase ?]: buildSnippet shared helper ensures identical masked output for CLI-absent and print paths (T-02-04)
 - [Phase ?]: claude-code removed from JSON_MCP_CLIENTS but retained in SUPPORTED_CLIENTS (CLI-02)
 - [Phase ?]: Claude Desktop write-path end-to-end verification
+- [Phase ?]: smokeTest settled guard ensures child.kill() fires exactly once across success/empty/timeout/spawn-error
+- [Phase ?]: VER-03 enforced in smokeTest: result object restricted to ok/toolCount/hasReadGuide/reason — env and raw child output never included
 
 ### Pending Todos
 
@@ -101,6 +104,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-06-09T12:45:34.545Z
+Last session: 2026-06-09T12:50:26.572Z
 Stopped at: Completed 02-02 claude-code install via claude mcp add CLI
 Resume file: None
