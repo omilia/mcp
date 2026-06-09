@@ -3,15 +3,15 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: executing
-stopped_at: Completed 01-02 wizard I/O layer (prompts.js + runWizard)
-last_updated: "2026-06-09T12:17:39.781Z"
+stopped_at: Completed 02-02 claude-code install via claude mcp add CLI
+last_updated: "2026-06-09T12:26:06.144Z"
 last_activity: 2026-06-09
 progress:
   total_phases: 4
   completed_phases: 1
   total_plans: 6
-  completed_plans: 4
-  percent: 67
+  completed_plans: 5
+  percent: 83
 ---
 
 # Project State
@@ -26,11 +26,11 @@ See: .planning/PROJECT.md (updated 2026-06-09)
 ## Current Position
 
 Phase: 02 (client-install-paths) — EXECUTING
-Plan: 2 of 3
+Plan: 3 of 3
 Status: Ready to execute
 Last activity: 2026-06-09
 
-Progress: [███████░░░] 67%
+Progress: [████████░░] 83%
 
 ## Performance Metrics
 
@@ -56,6 +56,7 @@ Progress: [███████░░░] 67%
 | Phase 01-interactive-wizard P01-02 | 420 | 2 tasks | 3 files |
 | Phase 01-interactive-wizard P03 | 1080 | 2 tasks | 3 files |
 | Phase 02-client-install-paths P01 | 5 | 2 tasks | 1 files |
+| Phase 02-client-install-paths P02-02 | 15 | 3 tasks | 5 files |
 
 ## Accumulated Context
 
@@ -75,6 +76,9 @@ Recent decisions affecting current work:
 - [Phase ?]: wizard TTY guard requires io.input !== undefined for legacy caller backward compat
 - [Phase ?]: wizardIo = { input: io.input, output: io.stdout } bridges runCli io shape to wizard io shape
 - [Phase ?]: PAT_INIT_GOLDEN_SHA256 derived from actual runCli output, not hand-copied from plan docs
+- [Phase ?]: Claude Code installed via claude mcp add CLI with injectable spawn
+- [Phase ?]: buildSnippet shared helper ensures identical masked output for CLI-absent and print paths (T-02-04)
+- [Phase ?]: claude-code removed from JSON_MCP_CLIENTS but retained in SUPPORTED_CLIENTS (CLI-02)
 
 ### Pending Todos
 
@@ -94,6 +98,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-06-09T12:17:33.004Z
-Stopped at: Completed 01-02 wizard I/O layer (prompts.js + runWizard)
+Last session: 2026-06-09T12:26:06.139Z
+Stopped at: Completed 02-02 claude-code install via claude mcp add CLI
 Resume file: None

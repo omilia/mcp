@@ -18,9 +18,9 @@ Requirements for this milestone. Each maps to a roadmap phase.
 
 ### Client Install
 
-- [ ] **CLI-01**: Claude Code install invokes the official `claude mcp add` CLI with the correct server name, command, and env
-- [ ] **CLI-02**: The broken `~/.claude/settings.json` write path for claude-code is removed/replaced so config lands where Claude Code actually reads MCP servers
-- [ ] **CLI-03**: When the `claude` CLI is not on PATH, the tool degrades gracefully with actionable guidance (printable config + instructions)
+- [x] **CLI-01**: Claude Code install invokes the official `claude mcp add` CLI with the correct server name, command, and env
+- [x] **CLI-02**: The broken `~/.claude/settings.json` write path for claude-code is removed/replaced so config lands where Claude Code actually reads MCP servers
+- [x] **CLI-03**: When the `claude` CLI is not on PATH, the tool degrades gracefully with actionable guidance (printable config + instructions)
 - [ ] **CLI-04**: Claude Desktop install path is verified end-to-end (config write to the correct location and/or `.mcpb` bundle install)
 - [x] **CLI-05**: Generated/written config uses the GitHub distribution spec (`npx -y github:omilia/mcp run`), consistently across clients
 
@@ -73,9 +73,9 @@ Deferred to a future milestone.
 | WIZ-04 | Phase 1 | Complete |
 | WIZ-05 | Phase 1 | Complete |
 | WIZ-06 | Phase 1 | Complete |
-| CLI-01 | Phase 2 | Pending |
-| CLI-02 | Phase 2 | Pending |
-| CLI-03 | Phase 2 | Pending |
+| CLI-01 | Phase 2 | Complete |
+| CLI-02 | Phase 2 | Complete |
+| CLI-03 | Phase 2 | Complete |
 | CLI-04 | Phase 2 | Pending |
 | CLI-05 | Phase 2 | Complete |
 | VER-01 | Phase 3 | Pending |
