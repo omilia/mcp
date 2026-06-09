@@ -443,6 +443,39 @@ test("wizard + --write: confirmation summary emitted before file write (WIZ-04 o
   // (c) file parses as JSON
   const fileContent = JSON.parse(readFileSync(outputPath, "utf8"));
   assert.ok(fileContent.mcpServers ?? fileContent.servers);
-  // Raw token must NOT appear in stdout
+  // Raw token must NOT appear in stdout (write path sends token to file, not stdout)
   assert.equal(output.stdout.includes("wiz-write-token-9999"), false);
+});
+
+test("wizard skips pre-supplied flag fields, prompts only for missing ones (WIZ-05 partial)", async () => {
+  // Provide --client and --base-url; only --access-token is missing.
+  // parseInitOptions defaults authChoice to "pat"; missingPromptFields only returns ["accessToken"].
+  const { io, output } = createScriptedIo(["partial-access-token-5678"]);
+  const result = await Promise.resolve(runCli([
+    "init", "--client", "claude-code", "--base-url", "https://ocp.example.com"
+  ], io));
+
+  assert.equal(result, 0);
+  // Confirmation summary present
+  assert.match(output.stdout, /Configuration summary/);
+  // Client CHOICE prompt must NOT appear (--client was pre-supplied).
+  // askChoice always emits "Enter number or value:" — its absence proves askChoice did not run.
+  assert.equal(output.stdout.includes("Enter number or value:"), false,
+    "--client was supplied so askChoice for client must not run");
+  // Only the "Access token: " prompt should appear before the confirmation summary —
+  // the wizard prompts only for the single missing field (accessToken).
+  // Check that the preamble (before "Configuration summary") contains exactly one
+  // prompt marker (the "Access token: " label from askSecret).
+  const summaryStart = output.stdout.indexOf("Configuration summary");
+  const preamble = summaryStart >= 0 ? output.stdout.slice(0, summaryStart) : output.stdout;
+  assert.match(preamble, /Access token:/);
+  // Base URL askText prompt must NOT appear in the preamble (--base-url was pre-supplied).
+  // askText emits "<label>: " — this substring would be in the preamble only if prompted.
+  // (The summary section is excluded above, so we only see the prompt region.)
+  assert.equal(preamble.includes("Base URL:"), false,
+    "--base-url was supplied so askText for baseUrl must not run");
+  // Raw token must NOT appear in the summary portion
+  const summaryEnd = output.stdout.indexOf("{");
+  const summaryPortion = summaryEnd >= 0 ? output.stdout.slice(0, summaryEnd) : output.stdout;
+  assert.equal(summaryPortion.includes("partial-access-token-5678"), false);
 });
