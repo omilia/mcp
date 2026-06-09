@@ -1,8 +1,9 @@
 import assert from "node:assert/strict";
 import crypto from "node:crypto";
-import { mkdtempSync, readFileSync } from "node:fs";
+import { existsSync, mkdtempSync, readFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
+import { Readable } from "node:stream";
 import test from "node:test";
 
 import { runCli } from "../lib/cli.js";
@@ -324,4 +325,110 @@ test("run rejects unsupported entrypoints", () => {
     () => buildRunCommand({ entrypoint: "bogus" }),
     /Unsupported entrypoint/
   );
+});
+
+// ─── Scripted TTY helper ──────────────────────────────────────────────────────
+// Creates an io object with a scripted stdin Readable (lazy async generator so
+// readline sees EOF only when all lines are consumed) and isTTY=true, plus
+// stdout/stderr capture. Used for interactive wizard tests.
+function createScriptedIo(answers) {
+  const outputCapture = {
+    stderr: "",
+    stdout: ""
+  };
+
+  const lines = answers.slice();
+
+  const input = Readable.from(
+    (async function* () {
+      for (const line of lines) {
+        yield line + "\n";
+      }
+    })()
+  );
+  // Signal to runInit that this is a TTY environment.
+  input.isTTY = true;
+
+  return {
+    io: {
+      input,
+      stderr: {
+        write(value) {
+          outputCapture.stderr += value;
+        }
+      },
+      stdout: {
+        write(value) {
+          outputCapture.stdout += value;
+        }
+      }
+    },
+    output: outputCapture
+  };
+}
+
+// ─── Task 1 / Task 2 integration tests ───────────────────────────────────────
+
+test("no-TTY bare init returns 1 and stderr names --client (WIZ-06)", async () => {
+  const io = createIo(); // no isTTY — io.input is undefined (falsy)
+  const result = await Promise.resolve(runCli(["init"], io));
+
+  assert.equal(result, 1);
+  assert.match(io.output.stderr, /--client/);
+  // Must NOT be the old parseInitOptions throw message
+  assert.equal(io.output.stderr.includes("Missing required option: --client"), false);
+});
+
+test("interactive bare init reaches masked confirmation summary (WIZ-01, WIZ-04)", async () => {
+  // Scripted answers: 1=claude-code, 1=pat, base-url, access-token
+  const { io, output } = createScriptedIo(["1", "1", "https://ocp.example.com", "super-secret-token-1234"]);
+  const result = await Promise.resolve(runCli(["init"], io));
+
+  assert.equal(result, 0);
+  // Confirmation summary must be present on stdout
+  assert.match(output.stdout, /Configuration summary/);
+  // Raw token must NOT appear in stdout (WIZ-04, T-01-07)
+  assert.equal(output.stdout.includes("super-secret-token-1234"), false);
+  // The masked tail should appear (last 4 of "super-secret-token-1234" = "1234")
+  assert.match(output.stdout, /1234/);
+});
+
+test("fully-flagged --print returns config JSON only, no prompts (WIZ-05)", async () => {
+  const io = createIo();
+  const result = await Promise.resolve(runCli([
+    "init", "--client", "claude-code",
+    "--auth", "pat",
+    "--base-url", "https://ocp.example.com",
+    "--access-token", "pat-test-token",
+    "--print"
+  ], io));
+
+  assert.equal(result, 0);
+  // Stdout must parse as JSON (config only)
+  const parsed = JSON.parse(io.output.stdout);
+  assert.ok(parsed.mcpServers ?? parsed.servers ?? parsed);
+  // No prompt labels on stdout
+  assert.equal(io.output.stdout.includes("Base URL"), false);
+  assert.equal(io.output.stdout.includes("Select"), false);
+  assert.equal(io.output.stdout.includes("MCP client"), false);
+});
+
+test("wizard + --write: confirmation summary emitted before file write (WIZ-04 ordering)", async () => {
+  const directory = mkdtempSync(join(tmpdir(), "ocp-mcp-wiz-"));
+  const outputPath = join(directory, "config.json");
+
+  // Scripted answers: 1=claude-code, 1=pat, base-url, access-token
+  const { io, output } = createScriptedIo(["1", "1", "https://ocp.example.com", "wiz-write-token-9999"]);
+  const result = await Promise.resolve(runCli(["init", "--write", "--path", outputPath], io));
+
+  assert.equal(result, 0);
+  // (a) confirmation summary on stdout
+  assert.match(output.stdout, /Configuration summary/);
+  // (b) file was created
+  assert.equal(existsSync(outputPath), true);
+  // (c) file parses as JSON
+  const fileContent = JSON.parse(readFileSync(outputPath, "utf8"));
+  assert.ok(fileContent.mcpServers ?? fileContent.servers);
+  // Raw token must NOT appear in stdout
+  assert.equal(output.stdout.includes("wiz-write-token-9999"), false);
 });
