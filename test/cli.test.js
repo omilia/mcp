@@ -370,27 +370,41 @@ function createScriptedIo(answers) {
 // ─── Task 1 / Task 2 integration tests ───────────────────────────────────────
 
 test("no-TTY bare init returns 1 and stderr names --client (WIZ-06)", async () => {
-  const io = createIo(); // no isTTY — io.input is undefined (falsy)
+  // Inject io.input with isTTY=false to simulate a non-interactive (CI) environment.
+  const outputCapture = { stderr: "", stdout: "" };
+  const io = {
+    input: { isTTY: false },
+    stderr: { write(v) { outputCapture.stderr += v; } },
+    stdout: { write(v) { outputCapture.stdout += v; } }
+  };
   const result = await Promise.resolve(runCli(["init"], io));
 
   assert.equal(result, 1);
-  assert.match(io.output.stderr, /--client/);
+  assert.match(outputCapture.stderr, /--client/);
   // Must NOT be the old parseInitOptions throw message
-  assert.equal(io.output.stderr.includes("Missing required option: --client"), false);
+  assert.equal(outputCapture.stderr.includes("Missing required option: --client"), false);
 });
 
 test("interactive bare init reaches masked confirmation summary (WIZ-01, WIZ-04)", async () => {
-  // Scripted answers: 1=claude-code, 1=pat, base-url, access-token
-  const { io, output } = createScriptedIo(["1", "1", "https://ocp.example.com", "super-secret-token-1234"]);
+  // parseInitOptions defaults authChoice to "pat", so the wizard only prompts for:
+  // client, baseUrl, accessToken (3 fields). Auth choice is already resolved.
+  const { io, output } = createScriptedIo(["1", "https://ocp.example.com", "super-secret-token-1234"]);
   const result = await Promise.resolve(runCli(["init"], io));
 
   assert.equal(result, 0);
   // Confirmation summary must be present on stdout
   assert.match(output.stdout, /Configuration summary/);
-  // Raw token must NOT appear in stdout (WIZ-04, T-01-07)
-  assert.equal(output.stdout.includes("super-secret-token-1234"), false);
-  // The masked tail should appear (last 4 of "super-secret-token-1234" = "1234")
-  assert.match(output.stdout, /1234/);
+
+  // Extract just the confirmation summary section (before the config JSON output).
+  // The confirmation summary is emitted before finishInit prints the config.
+  const summaryEnd = output.stdout.indexOf("{");
+  const summaryPortion = summaryEnd >= 0 ? output.stdout.slice(0, summaryEnd) : output.stdout;
+
+  // Raw token must NOT appear in the confirmation summary (WIZ-04, T-01-07)
+  assert.equal(summaryPortion.includes("super-secret-token-1234"), false,
+    "Raw token must not appear in confirmation summary");
+  // The masked tail should appear in the summary (last 4 of "super-secret-token-1234" = "1234")
+  assert.match(summaryPortion, /1234/);
 });
 
 test("fully-flagged --print returns config JSON only, no prompts (WIZ-05)", async () => {
@@ -417,8 +431,8 @@ test("wizard + --write: confirmation summary emitted before file write (WIZ-04 o
   const directory = mkdtempSync(join(tmpdir(), "ocp-mcp-wiz-"));
   const outputPath = join(directory, "config.json");
 
-  // Scripted answers: 1=claude-code, 1=pat, base-url, access-token
-  const { io, output } = createScriptedIo(["1", "1", "https://ocp.example.com", "wiz-write-token-9999"]);
+  // parseInitOptions defaults authChoice to "pat"; wizard prompts for: client, baseUrl, accessToken.
+  const { io, output } = createScriptedIo(["1", "https://ocp.example.com", "wiz-write-token-9999"]);
   const result = await Promise.resolve(runCli(["init", "--write", "--path", outputPath], io));
 
   assert.equal(result, 0);
