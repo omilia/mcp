@@ -46,7 +46,7 @@ Decimal phases appear between their surrounding integers in numeric order.
 **Plans**: 3 plans
 - [x] 02-01-PLAN.md — Fix stale fixtures (Cursor args + PAT golden SHA) so the full suite is green on the GitHub spec (CLI-05)
 - [x] 02-02-PLAN.md — Claude Code install via `claude mcp add` (injectable spawn, argv array); remove `~/.claude/settings.json` path; CLI-absent masked fallback (CLI-01/02/03)
-- [ ] 02-03-PLAN.md — Claude Desktop write-path end-to-end verification + `.mcpb` manifest/env consistency (CLI-04/05)
+- [x] 02-03-PLAN.md — Claude Desktop write-path end-to-end verification + `.mcpb` manifest/env consistency (CLI-04/05)
 **UI hint**: yes
 
 ### Phase 3: Install Verification
