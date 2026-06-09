@@ -57,7 +57,10 @@ Decimal phases appear between their surrounding integers in numeric order.
   1. If `node` (< 20) or `uv` is missing from PATH, the command reports exactly what is missing with a concrete install hint before proceeding
   2. After config is written, a smoke test starts the server and confirms tools are reachable
   3. `init` exits with a clear PASS or FAIL summary; no credentials appear in any output line
-**Plans**: TBD
+**Plans**: 3 plans
+- [ ] 03-01-PLAN.md — Prereq checks (lib/preflight.js): checkNode (>=20) + checkUv via injectable spawn, structured missing+hint result (VER-01)
+- [ ] 03-02-PLAN.md — Smoke test (lib/smoketest.js): spawn run command, MCP initialize + tools/list handshake over stdio, bounded timeout, child teardown, no env leak (VER-02/03)
+- [ ] 03-03-PLAN.md — Wire verification into finishInit + PASS/FAIL summary (lib/verify.js), --no-verify-install opt-out, --print skip, golden-SHA backward-compat (VER-01/02/03)
 
 ### Phase 4: Docs & Tests
 **Goal**: Developer guide reflects actual behavior; `test/cli.test.js` covers wizard, install paths, config writing, and CI-mode invocations
@@ -79,5 +82,5 @@ Phases execute in numeric order: 1 → 2 → 3 → 4
 |-------|----------------|--------|-----------|
 | 1. Interactive Wizard | 0/3 | Planned | - |
 | 2. Client Install Paths | 0/3 | Planned | - |
-| 3. Install Verification | 0/? | Not started | - |
+| 3. Install Verification | 0/3 | Planned | - |
 | 4. Docs & Tests | 0/? | Not started | - |
