@@ -71,7 +71,9 @@ Decimal phases appear between their surrounding integers in numeric order.
   2. Developer guide documents `claude mcp add` as the Claude Code install path (not `~/.claude/settings.json`)
   3. Developer guide includes a section describing the interactive wizard flow
   4. `test/cli.test.js` has passing tests for: wizard prompt flow, `claude mcp add` invocation (including absent-CLI fallback), config writes to correct locations per client, and fully-flagged non-interactive invocations
-**Plans**: TBD
+**Plans**: 2 plans
+- [ ] 04-01-PLAN.md — Reconcile README.md + docs/installation.md: assert GitHub spec, document `claude mcp add` Claude Code path, add interactive wizard section, flag Confluence guide for manual sync (DOC-01/02/03)
+- [ ] 04-02-PLAN.md — Audit existing tests against TST-01..04, produce coverage map (docs/test-coverage-map.md), add only genuine gap-fill tests; keep suite green (TST-01/02/03/04)
 
 ## Progress
 
@@ -83,4 +85,4 @@ Phases execute in numeric order: 1 → 2 → 3 → 4
 | 1. Interactive Wizard | 0/3 | Planned | - |
 | 2. Client Install Paths | 0/3 | Planned | - |
 | 3. Install Verification | 0/3 | Planned | - |
-| 4. Docs & Tests | 0/? | Not started | - |
+| 4. Docs & Tests | 0/2 | Planned | - |
