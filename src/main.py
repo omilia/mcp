@@ -1,3 +1,4 @@
+import re
 from datetime import datetime, timedelta
 from pathlib import Path
 from fastmcp import FastMCP
@@ -589,6 +590,306 @@ async def describe_metrics_table(table_name: str, Authorization: AuthorizationDe
     dimensions = [c for c in columns if c.get("pk")]
     measures = [c for c in columns if not c.get("pk")]
     return {"table": table_name, "columns": columns, "dimensions": dimensions, "measures": measures}
+
+
+# --- Metrics query helpers (shared by query_metrics_aggregation / query_metrics_grouped) ---
+
+_METRICS_OPERATORS = {"sum", "avg", "min", "max", "count"}
+# Columns that may never be used as a filter/group-by dimension (handled via ocp_group_names).
+_EXCLUDED_DIMENSION_COLUMNS = {"OCP_GROUP_NAME", "OCP_ORGANIZATION_ID"}
+# Trailing timezone offset (e.g. "+02:00", "-08:00", "Z") that the metrics API rejects.
+_TZ_OFFSET_RE = re.compile(r"(Z|[+-]\d{2}:\d{2})$")
+
+
+def _validate_metrics_operators(measures: list[dict]) -> None:
+    """Raise ToolError if any measure carries an operator outside the allowed enum."""
+    for m in measures:
+        op = m.get("operator")
+        if op not in _METRICS_OPERATORS:
+            raise ToolError(
+                f"Invalid operator '{op}' for measure '{m.get('name')}'. "
+                f"Allowed operators: {', '.join(sorted(_METRICS_OPERATORS))}."
+            )
+
+
+def _validate_metrics_time_format(value: str, field: str) -> None:
+    """Reject ISO-offset / 'T'-separated time input at the tool boundary.
+
+    The metrics API requires 'yyyy-MM-dd HH:mm:ss' with the timezone passed
+    separately; a clear tool-layer error beats a raw API 400.
+    """
+    if "T" in value or _TZ_OFFSET_RE.search(value):
+        raise ToolError(
+            f"'{field}' must be formatted 'yyyy-MM-dd HH:mm:ss' (no 'T' separator, "
+            "no timezone offset). Pass the timezone via the separate 'timezone' parameter."
+        )
+
+
+def _resolve_metrics_window(start, end):
+    """Resolve the query time range, defaulting to the last 24h when omitted.
+
+    Returns (start, end) as 'yyyy-MM-dd HH:mm:ss' strings. Provided values are
+    validated for format; omitted values default to now / now-24h.
+    """
+    now = datetime.now()
+    if start is None:
+        start = (now - timedelta(hours=24)).strftime("%Y-%m-%d %H:%M:%S")
+    else:
+        _validate_metrics_time_format(start, "start")
+    if end is None:
+        end = now.strftime("%Y-%m-%d %H:%M:%S")
+    else:
+        _validate_metrics_time_format(end, "end")
+    return start, end
+
+
+def _resolve_time_column(time_column, columns):
+    """Resolve the TIMESTAMP column to filter the range on.
+
+    Explicit time_column must exist; otherwise auto-detect a single TIMESTAMP
+    column. Zero or multiple candidates (with no explicit value) is an error.
+    """
+    names = {c.get("name") for c in columns}
+    if time_column:
+        if time_column not in names:
+            raise ToolError(
+                f"time_column '{time_column}' is not a column of this table. "
+                "Use describe_metrics_table to see available columns."
+            )
+        return time_column
+    timestamp_cols = [c["name"] for c in columns if "TIMESTAMP" in str(c.get("type", "")).upper()]
+    if len(timestamp_cols) == 1:
+        return timestamp_cols[0]
+    detail = (
+        f"found {len(timestamp_cols)} TIMESTAMP columns ({', '.join(timestamp_cols)})"
+        if timestamp_cols
+        else "no TIMESTAMP column found"
+    )
+    raise ToolError(
+        f"Could not auto-detect a time_column ({detail}). Pass time_column explicitly. "
+        "Use describe_metrics_table to see column types."
+    )
+
+
+def _classify_metrics_columns(columns):
+    """Return (pk_names, measure_names) sets from a describe_table result."""
+    pk_names = {c["name"] for c in columns if c.get("pk")}
+    measure_names = {c["name"] for c in columns if not c.get("pk")}
+    return pk_names, measure_names
+
+
+def _validate_measures(measures, measure_names):
+    """Each measure name must be an existing non-pk (measure) column."""
+    for m in measures:
+        if m.get("name") not in measure_names:
+            raise ToolError(
+                f"'{m.get('name')}' is not a measure of this table (must be a non-pk column). "
+                "Use describe_metrics_table to see available measures."
+            )
+
+
+def _validate_dimension_columns(cols, pk_names, kind):
+    """Each filter/group-by column must be a pk dimension and not an excluded column."""
+    if not cols:
+        return
+    for col in cols:
+        if col in _EXCLUDED_DIMENSION_COLUMNS or col not in pk_names:
+            raise ToolError(
+                f"{kind} column '{col}' must be a filterable dimension (a pk column) and "
+                f"cannot be one of {' / '.join(sorted(_EXCLUDED_DIMENSION_COLUMNS))}. "
+                "Use describe_metrics_table to see available dimensions."
+            )
+
+
+def _build_api_metrics(measures):
+    """Build the API metrics array; alias is required and defaults to operator_name."""
+    api_metrics = []
+    for m in measures:
+        name = m["name"]
+        op = m["operator"]
+        alias = m.get("alias") or f"{op}_{name}"
+        api_metrics.append({"name": name, "operator": op, "alias": alias})
+    return api_metrics
+
+
+@tool(tags=['metrics', PUBLIC])
+async def query_metrics_aggregation(table: str, measures: list[dict], ocp_group_names: list[str] | None=None, start: str | None=None, end: str | None=None, time_column: str | None=None, filters: list[dict] | None=None, timezone: str='UTC', ocp_organization_id: str | None=None, Authorization: AuthorizationDep=None, execution_mode: ExecutionModeDep='normal') -> dict:
+    """Compute overall metric totals for an OCP metrics table, scoped to an OCP group.
+
+    Answers "how many / what is the total/average …" questions. Each measure is
+    {name, operator} where operator is one of sum, avg, min, max, count (an optional
+    alias may be supplied). When start/end are omitted the range defaults to the last
+    24 hours (UTC). Columns are pre-validated against the table schema.
+
+    Args:
+        table: Table identifier. Use list_metrics_tables to discover tables.
+        measures: List of {"name", "operator"[, "alias"]} dicts. Operators:
+            sum/avg/min/max/count. Names must be measure (pk=False) columns.
+        ocp_group_names: REQUIRED. OCP group names scoping the query. Use
+            list_groups to discover valid groups.
+        start, end: Optional range bounds as 'yyyy-MM-dd HH:mm:ss' (no offset).
+            Omitted → last 24h. Pass timezone separately.
+        time_column: Optional TIMESTAMP column to filter the range on; auto-detected
+            when the table has exactly one TIMESTAMP column.
+        filters: Optional list of {"column", "values"} on dimension (pk) columns.
+        timezone: IANA-style timezone string (default "UTC").
+        ocp_organization_id: Optional org-id passthrough.
+
+    Returns:
+        dict: { table, version, range:{start,end,timezone}, ocp_group_names,
+                results:[{measure, operator, alias, value}] }
+
+    Raises:
+        ToolError: missing ocp_group_names (names list_groups); invalid operator;
+            non-measure name, non-pk filter column, or unresolved time_column
+            (names describe_metrics_table).
+    """
+    if not ocp_group_names:
+        raise ToolError(
+            "query_metrics_aggregation requires ocp_group_names. "
+            "Use list_groups to discover valid OCP groups."
+        )
+    _validate_metrics_operators(measures)
+
+    async with MetricsClient(auth_header=Authorization) as client:
+        columns = await client.describe_table(table)
+        if not columns:
+            raise ToolError(
+                f"No columns found for metrics table '{table}'. "
+                "Use describe_metrics_table to inspect a table or list_metrics_tables to see tables."
+            )
+        pk_names, measure_names = _classify_metrics_columns(columns)
+        _validate_measures(measures, measure_names)
+        _validate_dimension_columns([f.get("column") for f in filters] if filters else None, pk_names, "Filter")
+        resolved_tc = _resolve_time_column(time_column, columns)
+        start, end = _resolve_metrics_window(start, end)
+        api_metrics = _build_api_metrics(measures)
+        resp = await client.aggregate(
+            table,
+            metrics=api_metrics,
+            start=start,
+            end=end,
+            time_column=resolved_tc,
+            ocp_group_names=ocp_group_names,
+            filters=filters,
+            timezone=timezone,
+            ocp_organization_id=ocp_organization_id,
+        )
+        version = client.version
+
+    resp_metrics = resp.get("metrics", []) if isinstance(resp, dict) else []
+    by_alias = {m.get("name"): m.get("values") for m in resp_metrics}
+    results = [
+        {"measure": am["name"], "operator": am["operator"], "alias": am["alias"], "value": by_alias.get(am["alias"])}
+        for am in api_metrics
+    ]
+    return {
+        "table": table,
+        "version": version,
+        "range": {"start": start, "end": end, "timezone": timezone},
+        "ocp_group_names": ocp_group_names,
+        "results": results,
+    }
+
+
+@tool(tags=['metrics', PUBLIC])
+async def query_metrics_grouped(table: str, measures: list[dict], group_by: list[str], ocp_group_names: list[str] | None=None, percentage: bool=False, start: str | None=None, end: str | None=None, time_column: str | None=None, filters: list[dict] | None=None, timezone: str='UTC', ocp_organization_id: str | None=None, Authorization: AuthorizationDep=None, execution_mode: ExecutionModeDep='normal') -> dict:
+    """Break OCP metric totals down per dimension, scoped to an OCP group.
+
+    Answers "… by status / by region / by skill" questions. Same measure and time
+    semantics as query_metrics_aggregation (last-24h default, 'yyyy-MM-dd HH:mm:ss'
+    format). group_by columns must be dimension (pk) columns. When percentage=True,
+    the API computes per-group percentages server-side.
+
+    Args:
+        table: Table identifier. Use list_metrics_tables to discover tables.
+        measures: List of {"name", "operator"[, "alias"]} dicts (sum/avg/min/max/count).
+        group_by: REQUIRED non-empty list of dimension (pk) columns to break down by.
+        ocp_group_names: REQUIRED. OCP group names. Use list_groups to discover groups.
+        percentage: When True, request server-side percentages for the group-by columns.
+        start, end: Optional 'yyyy-MM-dd HH:mm:ss' bounds; omitted → last 24h.
+        time_column: Optional TIMESTAMP column; auto-detected when unambiguous.
+        filters: Optional list of {"column", "values"} on dimension (pk) columns.
+        timezone: IANA-style timezone string (default "UTC").
+        ocp_organization_id: Optional org-id passthrough.
+
+    Returns:
+        dict: { table, version, range, ocp_group_names, dimensions:[...],
+                rows:[{ <dim>: keyvalue, measures:{alias:value}, percentage? }] }
+
+    Raises:
+        ToolError: missing ocp_group_names (names list_groups); empty group_by;
+            invalid operator; non-measure name; non-pk group-by/filter column or
+            unresolved time_column (names describe_metrics_table).
+    """
+    if not ocp_group_names:
+        raise ToolError(
+            "query_metrics_grouped requires ocp_group_names. "
+            "Use list_groups to discover valid OCP groups."
+        )
+    if not group_by:
+        raise ToolError(
+            "query_metrics_grouped requires at least one group_by dimension. "
+            "Use describe_metrics_table to see available dimensions."
+        )
+    _validate_metrics_operators(measures)
+
+    async with MetricsClient(auth_header=Authorization) as client:
+        columns = await client.describe_table(table)
+        if not columns:
+            raise ToolError(
+                f"No columns found for metrics table '{table}'. "
+                "Use describe_metrics_table to inspect a table or list_metrics_tables to see tables."
+            )
+        pk_names, measure_names = _classify_metrics_columns(columns)
+        _validate_measures(measures, measure_names)
+        _validate_dimension_columns(group_by, pk_names, "group_by")
+        _validate_dimension_columns([f.get("column") for f in filters] if filters else None, pk_names, "Filter")
+        resolved_tc = _resolve_time_column(time_column, columns)
+        start, end = _resolve_metrics_window(start, end)
+        api_metrics = _build_api_metrics(measures)
+        resp = await client.query_grouped(
+            table,
+            metrics=api_metrics,
+            start=start,
+            end=end,
+            time_column=resolved_tc,
+            ocp_group_names=ocp_group_names,
+            group_by_columns=group_by,
+            percentage=(group_by if percentage else None),
+            filters=filters,
+            timezone=timezone,
+            ocp_organization_id=ocp_organization_id,
+        )
+        version = client.version
+
+    # Normalize per-dimension rows. Merge by key tuple (NOT positional index) so
+    # metrics with sparse/differently-ordered groups[] pair to the correct dimension.
+    resp_metrics = resp.get("metrics", []) if isinstance(resp, dict) else []
+    rows_by_key = {}
+    order = []
+    for metric in resp_metrics:
+        alias = metric.get("name")
+        for g in metric.get("groups", []):
+            key = tuple(g.get("key", []))
+            if key not in rows_by_key:
+                row = {col: key[i] for i, col in enumerate(group_by) if i < len(key)}
+                row["measures"] = {}
+                rows_by_key[key] = row
+                order.append(key)
+            rows_by_key[key]["measures"][alias] = g.get("value")
+            pct = g.get("percentage")
+            if isinstance(pct, dict) and "value" in pct:
+                rows_by_key[key]["percentage"] = pct["value"]
+    rows = [rows_by_key[k] for k in order]
+    return {
+        "table": table,
+        "version": version,
+        "range": {"start": start, "end": end, "timezone": timezone},
+        "ocp_group_names": ocp_group_names,
+        "dimensions": group_by,
+        "rows": rows,
+    }
 
 
 if __name__ == '__main__':
