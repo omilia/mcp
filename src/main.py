@@ -7,6 +7,7 @@ from dependencies import AllowedGroupsDep, AuthorizationDep, ExecutionModeDep
 from ocp.chat import ChatClient, ChatError
 from ocp.insights import InsightsClient
 from ocp.integrations import IntegrationsClient
+from ocp.metrics import MetricsClient
 from ocp.miniapps import MiniAppsClient
 from ocp.orchestrator import OrchestratorClient
 from ocp.pathfinder import PathfinderClient
@@ -542,5 +543,53 @@ async def read_guide(name: str | None=None, execution_mode: ExecutionModeDep='no
     if not guide_path.is_file():
         raise ToolError(f'Guide file missing on disk: {guide_path.name}')
     return {'name': requested, 'content': guide_path.read_text(encoding='utf-8'), 'available': list(_AVAILABLE_GUIDES)}
+@tool(tags=['metrics', PUBLIC])
+async def list_metrics_tables(Authorization: AuthorizationDep=None, execution_mode: ExecutionModeDep='normal') -> list[str]:
+    """List all queryable OCP metrics table names.
+
+    Returns the available metrics tables for the authenticated tenant.
+    Call describe_metrics_table next to learn a table's columns before querying.
+
+    Returns:
+        list[str]: Table name strings, e.g. ["DIALOGS_METRICS", "AGENT_ASSIST_AGENT_KPIS"].
+    """
+    async with MetricsClient(auth_header=Authorization) as client:
+        return await client.list_tables()
+
+
+@tool(tags=['metrics', PUBLIC])
+async def describe_metrics_table(table_name: str, Authorization: AuthorizationDep=None, execution_mode: ExecutionModeDep='normal') -> dict:
+    """Describe the columns of an OCP metrics table with dimension/measure classification.
+
+    Returns each column's name, SQL type, and whether it is a filterable dimension
+    (pk=True) or an aggregatable measure (pk=False). Dimensions are usable for
+    filters and group-by in query tools; measures are numeric values to aggregate.
+
+    Args:
+        table_name: The table identifier, e.g. "DIALOGS_METRICS". Use
+            list_metrics_tables to discover available tables.
+
+    Returns:
+        dict with keys:
+            - table: echoed table name
+            - columns: full list of column dicts (name, type, pk)
+            - dimensions: columns where pk=True (filterable / group-by keys)
+            - measures: columns where pk=False (aggregatable numeric values)
+
+    Raises:
+        ToolError: If the table is unknown or has no columns.
+    """
+    async with MetricsClient(auth_header=Authorization) as client:
+        columns = await client.describe_table(table_name)
+    if not columns:
+        raise ToolError(
+            f"No columns found for metrics table '{table_name}'. "
+            "Use list_metrics_tables to see available tables."
+        )
+    dimensions = [c for c in columns if c.get("pk")]
+    measures = [c for c in columns if not c.get("pk")]
+    return {"table": table_name, "columns": columns, "dimensions": dimensions, "measures": measures}
+
+
 if __name__ == '__main__':
     mcp.run()
