@@ -778,7 +778,9 @@ async def query_metrics_aggregation(table: str, measures: list[dict], ocp_group_
         version = client.version
 
     resp_metrics = resp.get("metrics", []) if isinstance(resp, dict) else []
-    by_alias = {m.get("name"): m.get("values") for m in resp_metrics}
+    # The aggregations response keys each metric by its alias with a singular
+    # "value" scalar (confirmed against the live API).
+    by_alias = {m.get("name"): m.get("value") for m in resp_metrics}
     results = [
         {"measure": am["name"], "operator": am["operator"], "alias": am["alias"], "value": by_alias.get(am["alias"])}
         for am in api_metrics

@@ -1,9 +1,26 @@
+import os
+
 from fastmcp.exceptions import ToolError
 from fastmcp.utilities.logging import get_logger
 
 from .base import BaseClient
 
 logger = get_logger(__name__)
+
+
+def _resolve_metrics_base_url(base_url: str) -> str:
+    """Resolve the host that actually serves metrics-api.
+
+    Metrics-api is NOT served on the OCP management/console host. On standard
+    OCP cloud deployments the management host ``*-m.ocp.ai`` maps to the
+    analytics host ``*-a.ocp.ai`` (e.g. https://us1-m.ocp.ai ->
+    https://us1-a.ocp.ai). An explicit OCP_METRICS_BASE_URL overrides this for
+    hosts that do not follow the convention.
+    """
+    override = os.getenv("OCP_METRICS_BASE_URL")
+    if override:
+        return override.rstrip("/")
+    return base_url.replace("-m.ocp.ai", "-a.ocp.ai").rstrip("/")
 
 
 def _raise_on_post_error(resp):
@@ -47,6 +64,8 @@ class MetricsClient(BaseClient):
         """
         super().__init__(*args, **kwargs)
         self.version = version
+        # Metrics-api lives on the analytics host, not the management host.
+        self.base_url = _resolve_metrics_base_url(self.base_url)
 
     async def list_tables(self) -> list:
         """Return the list of available metrics tables from the OCP metrics API.
@@ -67,27 +86,28 @@ class MetricsClient(BaseClient):
     async def describe_table(self, table_name: str) -> list:
         """Return the column schema for a specific metrics table.
 
-        Issues GET {base_url}/{METRICS_API_PREFIX}/{version}/tables/{table_name}.
-        The metrics API returns a top-level JSON list of column dicts (a bare
-        array, not a {"columns": [...]} envelope).
+        Issues GET {base_url}/{METRICS_API_PREFIX}/{version}/tables/{table_name}
+        and extracts the "columns" key. The live API returns a
+        {"columns": [...]} envelope (confirmed against us1-a.ocp.ai).
 
         Each column dict carries:
-          - name (str): column identifier, e.g. "OCP_GROUP_NAME"
-          - type (str): SQL type, e.g. "VARCHAR(64)"
+          - name (str): column identifier, e.g. "DIALOGDATE"
+          - type (str): SQL type, e.g. "TIMESTAMP_NTZ(9)", "NUMBER(38,0)"
           - pk (bool): True = dimension (filterable / group-by key);
                        False = measure (aggregatable numeric value)
 
         Args:
-            table_name: The table identifier, e.g. "DIALOGS_METRICS".
+            table_name: The table identifier, e.g. "MINIAPPS_DIALOGS_METRICS".
 
         Returns:
             list: Column dicts with name/type/pk fields.
-                  Returns [] if the response is not a top-level list.
+                  Returns [] if the "columns" key is absent or the response
+                  is not a dict.
         """
         endpoint = f"{METRICS_API_PREFIX}/{self.version}/tables/{table_name}"
         data = await self.get(endpoint)
-        if isinstance(data, list):
-            return data
+        if isinstance(data, dict):
+            return data.get("columns", [])
         return []
 
     def _build_query_payload(
@@ -114,9 +134,10 @@ class MetricsClient(BaseClient):
             "time_column": time_column,
             "timezone": timezone,
             "ocp_group_names": ocp_group_names,
+            # The API rejects a null/absent filters field ("Filters list cannot
+            # be null."), so always send a list — empty when no filters given.
+            "filters": filters or [],
         }
-        if filters:
-            payload["filters"] = filters
         if ocp_organization_id is not None:
             payload["ocp_organization_id"] = ocp_organization_id
         return payload

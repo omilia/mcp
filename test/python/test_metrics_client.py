@@ -101,45 +101,46 @@ class TestListTables(unittest.TestCase):
 
 class TestDescribeTable(unittest.TestCase):
     def test_describe_table_url_and_parse(self):
-        """describe_table() returns the top-level column list with pk classification intact."""
+        """describe_table() extracts the 'columns' envelope with pk classification intact."""
         client = MetricsClient(auth_header="tok")
         columns_data = [
-            {"name": "OCP_GROUP_NAME", "type": "VARCHAR(64)", "pk": True},
-            {"name": "DIALOGS_COUNT", "type": "NUMBER(18,0)", "pk": False},
+            {"name": "DIALOGDATE", "type": "TIMESTAMP_NTZ(9)", "pk": True},
+            {"name": "DIALOGS", "type": "NUMBER(38,0)", "pk": False},
         ]
-        # The metrics API returns a BARE ARRAY, not {"columns": [...]}.
-        fake_http = _wire_client(client, columns_data)
+        # The live metrics API returns a {"columns": [...]} envelope (confirmed
+        # against us1-a.ocp.ai), NOT a bare array.
+        fake_http = _wire_client(client, {"columns": columns_data})
 
-        result = _run(client.describe_table("DIALOGS_METRICS"))
+        result = _run(client.describe_table("MINIAPPS_DIALOGS_METRICS"))
 
         self.assertEqual(len(result), 2)
         pk_col = next(c for c in result if c["pk"] is True)
         measure_col = next(c for c in result if c["pk"] is False)
-        self.assertEqual(pk_col["name"], "OCP_GROUP_NAME")
-        self.assertEqual(measure_col["name"], "DIALOGS_COUNT")
+        self.assertEqual(pk_col["name"], "DIALOGDATE")
+        self.assertEqual(measure_col["name"], "DIALOGS")
 
         called_url = fake_http.get.call_args[0][0]
-        self.assertTrue(called_url.endswith("/tables/DIALOGS_METRICS"))
+        self.assertTrue(called_url.endswith("/tables/MINIAPPS_DIALOGS_METRICS"))
         self.assertIn("/metrics-api/v3/", called_url)
         self.assertNotIn("/api/", called_url)
 
-    def test_describe_table_parses_top_level_list_mixed_pk(self):
-        """Regression: a top-level list with mixed pk True/False is returned verbatim."""
+    def test_describe_table_parses_columns_envelope_mixed_pk(self):
+        """A {'columns': [...]} envelope with mixed pk True/False is returned intact."""
         client = MetricsClient(auth_header="tok")
         columns_data = [
             {"name": "FLOW_INSTANCE_STATUS", "type": "VARCHAR(32)", "pk": True},
             {"name": "STREAM_START_DATETIME", "type": "TIMESTAMP", "pk": True},
             {"name": "TOTAL_FLOWS", "type": "NUMBER(18,0)", "pk": False},
         ]
-        _wire_client(client, columns_data)
+        _wire_client(client, {"columns": columns_data})
 
         result = _run(client.describe_table("FLOWS"))
 
         self.assertEqual(result, columns_data)
         self.assertEqual([c["pk"] for c in result], [True, True, False])
 
-    def test_dict_response_returns_empty(self):
-        """describe_table() returns [] when the response is a dict (not the expected list)."""
+    def test_missing_columns_key_returns_empty(self):
+        """describe_table() returns [] when the dict has no 'columns' key."""
         client = MetricsClient(auth_header="tok")
         _wire_client(client, {})
 
@@ -147,8 +148,8 @@ class TestDescribeTable(unittest.TestCase):
 
         self.assertEqual(result, [])
 
-    def test_non_list_response_returns_empty(self):
-        """describe_table() returns [] for a None/non-list response."""
+    def test_non_dict_response_returns_empty(self):
+        """describe_table() returns [] for a None/non-dict response."""
         client = MetricsClient(auth_header="tok")
         _wire_client(client, None)
 
@@ -168,6 +169,38 @@ class TestMissingKeysReturnEmpty(unittest.TestCase):
         # Re-wire for second call (AsyncMock reuse is fine but be explicit)
         _wire_client(client, {})
         self.assertEqual(_run(client.describe_table("X")), [])
+
+
+class TestMetricsHostResolution(unittest.TestCase):
+    """Metrics-api is served on the analytics host, not the management host."""
+
+    def _client_for(self, base):
+        prev = os.environ.get("OCP_BASE_URL")
+        prev_override = os.environ.pop("OCP_METRICS_BASE_URL", None)
+        os.environ["OCP_BASE_URL"] = base
+        try:
+            return MetricsClient(auth_header="tok").base_url
+        finally:
+            os.environ["OCP_BASE_URL"] = prev
+            if prev_override is not None:
+                os.environ["OCP_METRICS_BASE_URL"] = prev_override
+
+    def test_management_host_maps_to_analytics_host(self):
+        self.assertEqual(self._client_for("https://us1-m.ocp.ai"), "https://us1-a.ocp.ai")
+
+    def test_other_regions_map_too(self):
+        self.assertEqual(self._client_for("https://eu1-m.ocp.ai"), "https://eu1-a.ocp.ai")
+
+    def test_non_management_host_unchanged(self):
+        self.assertEqual(self._client_for("https://pub.demo.ocp.ai"), "https://pub.demo.ocp.ai")
+
+    def test_explicit_override_wins(self):
+        os.environ["OCP_METRICS_BASE_URL"] = "https://custom-metrics.example.com"
+        try:
+            client = MetricsClient(auth_header="tok")
+            self.assertEqual(client.base_url, "https://custom-metrics.example.com")
+        finally:
+            del os.environ["OCP_METRICS_BASE_URL"]
 
 
 _METRICS = [{"name": "INTENTS_HANDLED", "operator": "count", "alias": "INTENT_COUNT"}]
@@ -204,8 +237,9 @@ class TestAggregate(unittest.TestCase):
         self.assertEqual(payload["time_column"], "STREAM_START_DATETIME")
         self.assertEqual(payload["timezone"], "UTC")
         self.assertEqual(payload["ocp_group_names"], ["ocp-qa"])
-        # filters omitted when not supplied; org id omitted when not supplied
-        self.assertNotIn("filters", payload)
+        # filters always present (API rejects null) — empty list when none given;
+        # org id omitted when not supplied
+        self.assertEqual(payload["filters"], [])
         self.assertNotIn("ocp_organization_id", payload)
 
     def test_aggregate_optional_keys_included_when_supplied(self):

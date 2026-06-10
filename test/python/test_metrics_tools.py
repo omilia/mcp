@@ -119,7 +119,7 @@ class TestQueryMetricsAggregation(unittest.TestCase):
 
     def test_aggregation_happy_path_normalizes(self):
         """Returns normalized totals mapping the API alias to its value."""
-        agg = {"metrics": [{"name": "count_TOTAL_FLOWS", "values": 8923}]}
+        agg = {"metrics": [{"name": "count_TOTAL_FLOWS", "value": 8923}]}
         mock_client = _make_metrics_client_mock(_SCHEMA, aggregate_return=agg)
 
         result = self._run_tool(
