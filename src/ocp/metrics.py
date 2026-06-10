@@ -4,13 +4,9 @@ from .base import BaseClient
 
 logger = get_logger(__name__)
 
-# TODO: confirm against the metrics-api OpenAPI spec once available.
-# Grounding search (find *openapi* + grep metrics-api|/tables in src) found NO existing routes or specs.
-# Prefix follows the "{domain}-api/{area}" shape of insights.py (dialogs-api/insights), which
-# also carries an explicit version segment — the closest structural analog to metrics.
-# integrations.py uses "{domain}/api" but has no version segment, making it a weaker analog here.
-# This constant is the single line to change when the spec is confirmed.
-METRICS_API_PREFIX = "metrics-api/api"
+# Confirmed against Confluence (OCP Metrics API). Full URL = {base_url}/metrics-api/{version}/tables/...
+# There is NO "/api" segment.
+METRICS_API_PREFIX = "metrics-api"
 
 # Default API version. Overridable via MetricsClient(version="v4").
 DEFAULT_METRICS_VERSION = "v3"
@@ -56,8 +52,9 @@ class MetricsClient(BaseClient):
     async def describe_table(self, table_name: str) -> list:
         """Return the column schema for a specific metrics table.
 
-        Issues GET {base_url}/{METRICS_API_PREFIX}/{version}/tables/{table_name}
-        and extracts the "columns" key from the response.
+        Issues GET {base_url}/{METRICS_API_PREFIX}/{version}/tables/{table_name}.
+        The metrics API returns a top-level JSON list of column dicts (a bare
+        array, not a {"columns": [...]} envelope).
 
         Each column dict carries:
           - name (str): column identifier, e.g. "OCP_GROUP_NAME"
@@ -70,10 +67,10 @@ class MetricsClient(BaseClient):
 
         Returns:
             list: Column dicts with name/type/pk fields.
-                  Returns [] if the "columns" key is absent or the response is not a dict.
+                  Returns [] if the response is not a top-level list.
         """
         endpoint = f"{METRICS_API_PREFIX}/{self.version}/tables/{table_name}"
         data = await self.get(endpoint)
-        if not isinstance(data, dict):
-            return []
-        return data.get("columns", [])
+        if isinstance(data, list):
+            return data
+        return []

@@ -69,6 +69,17 @@ class TestListTables(unittest.TestCase):
 
         self.assertEqual(result, [])
 
+    def test_list_tables_url_has_no_api_segment(self):
+        """Regression: the list_tables URL is /metrics-api/v3/tables with NO /api/ segment."""
+        client = MetricsClient(auth_header="tok")
+        fake_http = _wire_client(client, {"tables": []})
+
+        _run(client.list_tables())
+
+        called_url = fake_http.get.call_args[0][0]
+        self.assertEqual(called_url, "https://test.ocp.ai/metrics-api/v3/tables")
+        self.assertNotIn("/api/", called_url)
+
     def test_non_dict_response_returns_empty(self):
         """list_tables() returns [] for a non-dict response."""
         client = MetricsClient(auth_header="tok")
@@ -81,13 +92,14 @@ class TestListTables(unittest.TestCase):
 
 class TestDescribeTable(unittest.TestCase):
     def test_describe_table_url_and_parse(self):
-        """describe_table() returns columns with pk classification and calls the correct URL."""
+        """describe_table() returns the top-level column list with pk classification intact."""
         client = MetricsClient(auth_header="tok")
         columns_data = [
             {"name": "OCP_GROUP_NAME", "type": "VARCHAR(64)", "pk": True},
             {"name": "DIALOGS_COUNT", "type": "NUMBER(18,0)", "pk": False},
         ]
-        fake_http = _wire_client(client, {"columns": columns_data})
+        # The metrics API returns a BARE ARRAY, not {"columns": [...]}.
+        fake_http = _wire_client(client, columns_data)
 
         result = _run(client.describe_table("DIALOGS_METRICS"))
 
@@ -99,9 +111,26 @@ class TestDescribeTable(unittest.TestCase):
 
         called_url = fake_http.get.call_args[0][0]
         self.assertTrue(called_url.endswith("/tables/DIALOGS_METRICS"))
+        self.assertIn("/metrics-api/v3/", called_url)
+        self.assertNotIn("/api/", called_url)
 
-    def test_missing_columns_key_returns_empty(self):
-        """describe_table() returns [] when the response has no 'columns' key."""
+    def test_describe_table_parses_top_level_list_mixed_pk(self):
+        """Regression: a top-level list with mixed pk True/False is returned verbatim."""
+        client = MetricsClient(auth_header="tok")
+        columns_data = [
+            {"name": "FLOW_INSTANCE_STATUS", "type": "VARCHAR(32)", "pk": True},
+            {"name": "STREAM_START_DATETIME", "type": "TIMESTAMP", "pk": True},
+            {"name": "TOTAL_FLOWS", "type": "NUMBER(18,0)", "pk": False},
+        ]
+        _wire_client(client, columns_data)
+
+        result = _run(client.describe_table("FLOWS"))
+
+        self.assertEqual(result, columns_data)
+        self.assertEqual([c["pk"] for c in result], [True, True, False])
+
+    def test_dict_response_returns_empty(self):
+        """describe_table() returns [] when the response is a dict (not the expected list)."""
         client = MetricsClient(auth_header="tok")
         _wire_client(client, {})
 
@@ -109,8 +138,8 @@ class TestDescribeTable(unittest.TestCase):
 
         self.assertEqual(result, [])
 
-    def test_non_dict_response_returns_empty(self):
-        """describe_table() returns [] for a non-dict response."""
+    def test_non_list_response_returns_empty(self):
+        """describe_table() returns [] for a None/non-list response."""
         client = MetricsClient(auth_header="tok")
         _wire_client(client, None)
 
