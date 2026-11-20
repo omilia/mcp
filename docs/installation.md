@@ -9,7 +9,7 @@
   This guide (docs/installation.md) is the authoritative in-repo developer reference
   and reflects current behavior. The Confluence guide must be updated manually to match:
     - GitHub distribution spec (github:omilia/mcp)
-    - Interactive wizard (`npx github:omilia/mcp init` with no flags)
+    - Interactive wizard (`npx github:omilia/mcp#v0.1.0 init` with no flags)
     - Claude Code install via `claude mcp add` (no JSON config file written)
 
   Syncing the Confluence guide is a manual, out-of-scope follow-up for a team member
@@ -22,7 +22,7 @@ your client and how often you upgrade.
 
 | Method | Best for | Friction | Updates |
 |---|---|---|---|
-| **Interactive wizard** (recommended) | First-time setup; any supported client; guided prompts, prereq checks, and smoke-test confirmation | Answer a few prompts | Re-run `npx github:omilia/mcp init` |
+| **Interactive wizard** (recommended) | First-time setup; any supported client; guided prompts, prereq checks, and smoke-test confirmation | Answer a few prompts | Re-run `npx github:omilia/mcp#v0.1.0 init` |
 | **`npx` CLI installer** | Developers who already have `npx` available; writes the client config for you | Single command with flags | Re-run the CLI |
 | **`.mcpb` bundle** | Claude Desktop users; non-technical users; environments without `npx` | Drag-and-drop install with a GUI prompt for secrets | Download the new bundle and reinstall |
 | **Manual MCP configuration** | Anyone comfortable editing JSON; works in all 5 supported clients | Lowest setup, no install step | Manual JSON edit per upgrade |
@@ -41,8 +41,9 @@ your client and how often you upgrade.
 > `~/.zshenv` or launch the client from a terminal.
 
 The package is distributed directly from the public GitHub mirror —
-no npm registry account or login required. The bare `github:omilia/mcp`
-URL resolves to the default branch (`main`).
+no npm registry account or login required. The commands in this guide pin
+to the tagged release (`#v0.1.0`). The bare `github:omilia/mcp` URL resolves
+to the default branch (`main`) instead.
 
 ---
 
@@ -51,7 +52,7 @@ URL resolves to the default branch (`main`).
 Run with no flags to launch the guided wizard:
 
 ```bash
-npx github:omilia/mcp init
+npx github:omilia/mcp#v0.1.0 init
 ```
 
 The wizard walks you through every required field in order and will not
@@ -94,7 +95,7 @@ verification.
 line and the wizard skips prompts entirely:
 
 ```bash
-npx github:omilia/mcp init \
+npx github:omilia/mcp#v0.1.0 init \
   --client claude-code \
   --auth pat \
   --base-url "https://us1-m.ocp.ai" \
@@ -114,7 +115,7 @@ flags, `.mcpb` bundle, and manual JSON configuration alternatives.
 ## 1. `npx` CLI installer
 
 ```bash
-npx github:omilia/mcp init --client claude --write
+npx github:omilia/mcp#v0.1.0 init --client claude --write
 ```
 
 Supported clients: `cursor`, `claude`, `claude-code`, `vscode`, `codex`.
@@ -136,7 +137,7 @@ file for Claude Code — `claude mcp add` is the authoritative registration path
 claude mcp add OCP --scope user \
   --env OCP_BASE_URL=your-ocp-base-url \
   --env OCP_ACCESS_TOKEN=your-ocp-access-token \
-  -- npx -y github:omilia/mcp run
+  -- npx -y github:omilia/mcp#v0.1.0 run
 ```
 
 **Keycloak authentication** — the installer runs:
@@ -147,7 +148,7 @@ claude mcp add OCP --scope user \
   --env OCP_USERNAME=your-ocp-username \
   --env OCP_PASSWORD=your-ocp-password \
   --env OCP_KEYCLOAK_REALM=master \
-  -- npx -y github:omilia/mcp run
+  -- npx -y github:omilia/mcp#v0.1.0 run
 ```
 
 The `OCP` server name and the `--env` key names are fixed constants from the
@@ -190,7 +191,7 @@ For one-shot install with the values baked in, pass `--base-url` and
 `--access-token`:
 
 ```bash
-npx github:omilia/mcp init --client claude --write \
+npx github:omilia/mcp#v0.1.0 init --client claude --write \
   --base-url "https://us1-m.ocp.ai" \
   --access-token "$OCP_ACCESS_TOKEN"
 ```
@@ -198,7 +199,7 @@ npx github:omilia/mcp init --client claude --write \
 For indirection mode, pass `--use-env-vars`:
 
 ```bash
-npx github:omilia/mcp init --client claude --write --use-env-vars
+npx github:omilia/mcp#v0.1.0 init --client claude --write --use-env-vars
 ```
 
 …produces:
@@ -274,7 +275,7 @@ Print the canonical config snippet for your client and paste it into
 the client's MCP config file.
 
 ```bash
-npx github:omilia/mcp init --client claude --print
+npx github:omilia/mcp#v0.1.0 init --client claude --print
 # also: cursor, claude-code, vscode, codex
 ```
 

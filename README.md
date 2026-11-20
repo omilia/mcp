@@ -22,7 +22,7 @@ Claude Desktop, Claude Code, Cursor, VS Code (with Copilot), and Codex.
 **Recommended — interactive wizard (answers a few prompts, then confirms before writing anything):**
 
 ```bash
-npx github:omilia/mcp init
+npx github:omilia/mcp#v0.1.0 init
 ```
 
 The wizard selects your client, collects credentials with masked input,
@@ -34,7 +34,7 @@ in the installation guide for the full prompt sequence.
 **Non-interactive / CI — supply all flags to skip prompts:**
 
 ```bash
-npx github:omilia/mcp init --client <claude|claude-code|cursor|vscode|codex>
+npx github:omilia/mcp#v0.1.0 init --client <claude|claude-code|cursor|vscode|codex>
 ```
 
 See the full installation guide at [docs/installation.md](docs/installation.md)
